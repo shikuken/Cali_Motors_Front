@@ -1,0 +1,227 @@
+🚗 1. Gestión de Usuarios
+HU-01 – Registro de usuario
+
+Como visitante
+Quiero registrarme en la plataforma
+Para poder comprar o vender vehículos
+
+Criterios de aceptación:
+
+Debo ingresar nombre, correo y contraseña.
+
+El correo no puede repetirse.
+
+La contraseña debe estar encriptada en la base de datos (MySQL).
+
+Se debe validar formato de correo.
+
+HU-02 – Inicio de sesión
+
+Como usuario registrado
+Quiero iniciar sesión
+Para acceder a mi cuenta
+
+Criterios de aceptación:
+
+Debe validar correo y contraseña.
+
+Se debe generar un token JWT.
+
+Si los datos son incorrectos, debe mostrar mensaje de error.
+
+HU-03 – Cerrar sesión
+
+Como usuario autenticado
+Quiero cerrar sesión
+Para proteger mi cuenta
+
+Criterios de aceptación:
+
+El token debe eliminarse del almacenamiento del frontend.
+
+El usuario debe ser redirigido al home.
+
+🚘 2. Publicación de Vehículos
+HU-04 – Publicar vehículo
+
+Como usuario vendedor
+Quiero publicar un vehículo usado
+Para ofrecerlo en venta
+
+Criterios de aceptación:
+
+Debe ingresar:
+
+Marca
+
+Modelo
+
+Año
+
+Precio
+
+Kilometraje
+
+Descripción
+
+Fotos
+
+Solo usuarios autenticados pueden publicar.
+
+El vehículo debe guardarse en MySQL.
+
+HU-05 – Editar publicación
+
+Como vendedor
+Quiero editar mi vehículo publicado
+Para actualizar información o precio
+
+Criterios de aceptación:
+
+Solo el dueño puede editar.
+
+Los cambios deben reflejarse inmediatamente.
+
+HU-06 – Eliminar publicación
+
+Como vendedor
+Quiero eliminar mi vehículo
+Para retirarlo del mercado
+
+Criterios de aceptación:
+
+Debe pedirse confirmación.
+
+Solo el dueño puede eliminar.
+
+🔎 3. Catálogo y Búsqueda
+HU-07 – Ver catálogo de vehículos
+
+Como visitante
+Quiero ver la lista de vehículos disponibles
+Para explorar opciones
+
+Criterios de aceptación:
+
+Debe mostrarse en tarjetas (React).
+
+Debe mostrar:
+
+Imagen principal
+
+Marca
+
+Modelo
+
+Año
+
+Precio
+
+HU-08 – Filtrar vehículos
+
+Como usuario
+Quiero filtrar por marca, precio o año
+Para encontrar opciones específicas
+
+Criterios de aceptación:
+
+Filtros dinámicos.
+
+La consulta debe hacerse desde el backend (Node + MySQL).
+
+Los resultados deben actualizarse sin recargar la página.
+
+HU-09 – Ver detalle del vehículo
+
+Como usuario
+Quiero ver el detalle completo de un vehículo
+Para tomar una decisión de compra
+
+Criterios de aceptación:
+
+Mostrar todas las imágenes.
+
+Mostrar datos completos.
+
+Mostrar datos del vendedor.
+
+🛒 4. Proceso de Compra (Versión inicial simple)
+HU-10 – Contactar vendedor
+
+Como comprador
+Quiero enviar un mensaje al vendedor
+Para negociar la compra
+
+Criterios de aceptación:
+
+Debe enviarse notificación al vendedor.
+
+El mensaje debe almacenarse en la base de datos.
+
+HU-11 – Marcar como vendido
+
+Como vendedor
+Quiero marcar un vehículo como vendido
+Para indicar que ya no está disponible
+
+Criterios de aceptación:
+
+El estado debe cambiar a "Vendido".
+
+No debe aparecer en búsquedas activas.
+
+👑 5. Administración (Opcional pero recomendable)
+HU-12 – Administrar usuarios
+
+Como administrador
+Quiero bloquear usuarios
+Para mantener la seguridad de la plataforma
+
+HU-13 – Moderar publicaciones
+
+Como administrador
+Quiero eliminar publicaciones inapropiadas
+Para mantener calidad en el sistema
+
+🗄️ Modelo Básico de Base de Datos (MySQL)
+
+Tablas sugeridas:
+
+users
+
+vehicles
+
+messages
+
+roles
+
+vehicle_images
+
+🏗️ Arquitectura sugerida
+Backend (Node.js + Express)
+
+Autenticación JWT
+
+CRUD de vehículos
+
+Filtros con query params
+
+Middleware de autenticación
+
+Frontend (React)
+
+React Router
+
+Context API o Redux para auth
+
+Axios para consumir API
+
+Base de Datos (MySQL)
+
+Relaciones:
+
+Un usuario → muchos vehículos
+
+Un vehículo → muchas imágenes
+
+Un vehículo → muchos mensajes
