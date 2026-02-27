@@ -1,10 +1,14 @@
-"use server"
+"use client"
 
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 
-export async function signOut() {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  redirect("/auth/login")
+export function useSignOut() {
+  const router = useRouter()
+
+  const handleSignOut = () => {
+    localStorage.removeItem("user")
+    router.push("/auth/login")
+  }
+
+  return handleSignOut
 }

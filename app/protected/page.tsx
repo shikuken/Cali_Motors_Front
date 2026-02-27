@@ -1,17 +1,29 @@
-import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+"use client"
 
-export default async function ProtectedPage() {
-  const supabase = await createClient()
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { DashboardContent } from "@/components/dashboard-content"
 
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
-    redirect("/auth/login")
+export default function ProtectedPage() {
+  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    if (!storedUser) {
+      router.push("/auth/login")
+    } else {
+      setUser(JSON.parse(storedUser))
+    }
+  }, [router])
+
+  if (!user) {
+    return <div className="flex min-h-screen items-center justify-center">Cargando...</div>
   }
 
   return (
     <main className="min-h-screen">
-      {/* Página protegida - contenido aquí */}
+      <DashboardContent user={user} />
     </main>
   )
 }

@@ -2,10 +2,9 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { signOut } from "@/app/auth/actions"
+import { useSignOut } from "@/app/auth/actions"
 import { Car, Users, DollarSign, MessageSquare, TrendingUp, Package, CreditCard, AlertCircle } from "lucide-react"
 import useSWR from "swr"
-import type { User } from "@supabase/supabase-js"
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
@@ -13,8 +12,9 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
 }
 
-export function DashboardContent({ user }: { user: User }) {
+export function DashboardContent({ user }: { user: any }) {
   const { data: stats, isLoading } = useSWR("/api/dashboard/stats", fetcher)
+  const handleSignOut = useSignOut()
 
   const dashboardData = stats?.data
 
@@ -26,11 +26,11 @@ export function DashboardContent({ user }: { user: User }) {
             <h1 className="text-2xl font-bold font-sans text-foreground">CaliMotors Dashboard</h1>
             <p className="text-sm text-muted-foreground">Welcome back, {user.email}</p>
           </div>
-          <form action={signOut}>
-            <Button variant="outline" type="submit">
+          <div>
+            <Button variant="outline" onClick={handleSignOut}>
               Sign Out
             </Button>
-          </form>
+          </div>
         </div>
       </header>
 
