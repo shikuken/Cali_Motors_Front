@@ -59,8 +59,21 @@ export default function Page() {
     setIsLoading(true)
     setError(null)
 
+    // Validaciones locales
+    if (!email || !password || !repeatPassword || !firstName || !lastName || !phoneNumber) {
+      setError('Por favor completa todos los campos')
+      setIsLoading(false)
+      return
+    }
+
     if (password !== repeatPassword) {
       setError('Las contraseñas no coinciden')
+      setIsLoading(false)
+      return
+    }
+
+    if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      setError('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número')
       setIsLoading(false)
       return
     }
@@ -81,10 +94,19 @@ export default function Page() {
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(errorText || 'Error al registrar el usuario')
+        throw new Error(data.message || 'Error al registrar el usuario')
       }
+
+      // Guardar datos del usuario en localStorage (opcional)
+      localStorage.setItem('user', JSON.stringify({ 
+        email, 
+        firstName, 
+        lastName,
+        userId: data.userId 
+      }))
 
       router.push('/auth/sign-up-success')
     } catch (error: any) {
