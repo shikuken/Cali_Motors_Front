@@ -14,7 +14,7 @@ export default function Home() {
           </p>
           <div className="flex gap-4">
             <Link href="/auth/login">
-              <Button>Sign In</Button>
+              <Button>Iniciar sesión</Button>
             </Link>
             <Link href="/auth/sign-up">
               <Button variant="outline">Crear Cuenta</Button>

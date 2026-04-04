@@ -251,15 +251,15 @@ export function DashboardContent({ user }: { user: any }) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="border-b border-slate-800 bg-slate-900 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
               <Car className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-lg font-bold">Cali Motors</p>
-              <p className="text-sm text-slate-500">Compra y venta de vehículos</p>
+              <p className="text-lg font-bold text-white">Cali Motors</p>
+              <p className="text-sm text-white">Compra y venta de vehículos</p>
             </div>
           </div>
 
