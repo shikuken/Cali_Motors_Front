@@ -1,424 +1,220 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Car, ArrowLeft, Loader2, Upload, X } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2 } from "lucide-react"
 
-export default function EditVehiclePage() {
-  const router = useRouter()
+export default function VehicleDetailPage() {
   const params = useParams()
-  const vehicleId = params.id as string
+  const router = useRouter()
+  // Since the folder is named [Id], the param is accessed as params.Id
+  const vehicleId = params.Id as string
 
-  const [loading, setLoading] = useState(false)
-  const [loadingData, setLoadingData] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [vehicle, setVehicle] = useState<any>(null)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-
-  const [formData, setFormData] = useState({
-    marca: "",
-    modelo: "",
-    año: new Date().getFullYear(),
-    precio: "",
-    kilometraje: "",
-    descripcion: "",
-    imagen: null as File | null,
-  })
 
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/vehicles/user/0`)
-        if (response.ok) {
-          const vehicles = await response.json()
-          const vehicle = vehicles.find((v: any) => v.id === Number(vehicleId))
-
-          if (vehicle) {
-            setFormData((prev) => ({
-              ...prev,
-              marca: vehicle.marca,
-              modelo: vehicle.modelo,
-              año: vehicle.año,
-              precio: vehicle.precio.toString(),
-              kilometraje: vehicle.kilometraje.toString(),
-              descripcion: vehicle.descripcion || "",
-            }))
-
-            if (vehicle.imagen) {
-              setImagePreview(vehicle.imagen)
-            }
-          }
+        const response = await fetch(`http://localhost:3001/vehicles/${vehicleId}`)
+        if (!response.ok) {
+          throw new Error("Vehículo no encontrado")
         }
+        const data = await response.json()
+        setVehicle(data)
       } catch (err) {
-        console.error("Error fetching vehicle:", err)
+        setError(err instanceof Error ? err.message : "Error al cargar la información")
       } finally {
-        setLoadingData(false)
+        setLoading(false)
       }
     }
 
-    const user = localStorage.getItem("user")
-    if (user) {
-      const userData = JSON.parse(user)
-      // Usando user ID real
-      fetch(`http://localhost:3001/vehicles/user/${userData.id}`)
-        .then((res) => res.json())
-        .then((vehicles) => {
-          const vehicle = vehicles.find((v: any) => v.id === Number(vehicleId))
-          if (vehicle) {
-            setFormData((prev) => ({
-              ...prev,
-              marca: vehicle.marca,
-              modelo: vehicle.modelo,
-              año: vehicle.año,
-              precio: vehicle.precio.toString(),
-              kilometraje: vehicle.kilometraje.toString(),
-              descripcion: vehicle.descripcion || "",
-            }))
-
-            if (vehicle.imagen) {
-              setImagePreview(vehicle.imagen)
-            }
-          }
-          setLoadingData(false)
-        })
-        .catch(() => setLoadingData(false))
+    if (vehicleId) {
+      fetchVehicle()
     }
   }, [vehicleId])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "año" || name === "precio" || name === "kilometraje" ? (value ? Number(value) : "") : value,
-    }))
-  }
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        imagen: file,
-      }))
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const removeImage = () => {
-    setFormData((prev) => ({
-      ...prev,
-      imagen: null,
-    }))
-    setImagePreview(null)
-  }
-
-  const formatPrecio = (value: number | string) => {
-    if (!value) return ""
-    const num = Number(value)
-    return num.toLocaleString("es-CO")
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
-
-    try {
-      const user = localStorage.getItem("user")
-      if (!user) {
-        setError("Debes estar autenticado")
-        router.push("/auth/login")
-        return
-      }
-
-      if (!formData.marca || !formData.modelo || !formData.año || !formData.precio) {
-        setError("Completa todos los campos obligatorios")
-        setLoading(false)
-        return
-      }
-
-      let imagenBase64 = imagePreview
-      if (formData.imagen) {
-        imagenBase64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onloadend = () => {
-            resolve(reader.result as string)
-          }
-          reader.readAsDataURL(formData.imagen!)
-        })
-      }
-
-      const response = await fetch(`http://localhost:3001/vehicles/${vehicleId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          marca: formData.marca,
-          modelo: formData.modelo,
-          año: formData.año,
-          precio: formData.precio,
-          kilometraje: formData.kilometraje || 0,
-          descripcion: formData.descripcion,
-          imagen: imagenBase64,
-          estado: "Activo",
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Error al actualizar el vehículo")
-      }
-
-      setSuccess(true)
-      setTimeout(() => {
-        router.push("/protected")
-      }, 2000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al actualizar el vehículo")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  if (loadingData) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600">Cargando vehículo...</div>
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-slate-500 mb-4" />
+        <p className="text-slate-600 font-medium animate-pulse">Cargando detalles del vehículo...</p>
       </div>
     )
   }
 
+  if (error || !vehicle) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+          <Car className="h-10 w-10 text-red-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Ups, algo salió mal</h2>
+        <p className="text-slate-600 mb-8 max-w-md">{error || "No se pudo cargar la información del vehículo"}</p>
+        <Button onClick={() => router.push("/protected")} className="rounded-xl px-8">
+          Volver al catálogo
+        </Button>
+      </div>
+    )
+  }
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value)
+  }
+
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat("es-CO").format(value)
+  }
+
+  const sellerName = vehicle.first_name && vehicle.last_name 
+    ? `${vehicle.first_name} ${vehicle.last_name}`
+    : "Vendedor"
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4 lg:px-6">
-          <Link href="/protected" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm font-medium">Volver</span>
+    <div className="min-h-screen bg-slate-50 font-sans pb-16">
+      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 lg:px-8">
+          <Link href="/protected" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+            <div className="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
+              <ArrowLeft className="h-5 w-5" />
+            </div>
+            <span className="font-medium hidden sm:inline">Volver a Explorar</span>
           </Link>
           <div className="flex items-center gap-3 ml-auto">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
               <Car className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-sm font-bold">Cali Motors</p>
-              <p className="text-xs text-slate-500">Editar vehículo</p>
+            <div className="hidden sm:block">
+              <p className="text-sm font-bold text-slate-900">Cali Motors</p>
+              <p className="text-xs text-slate-500">Detalles del vehículo</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-3xl">Editar vehículo</CardTitle>
-            <CardDescription>Actualiza los detalles de tu vehículo</CardDescription>
-          </CardHeader>
+      <main className="mx-auto max-w-7xl px-4 pt-8 lg:px-8">
+        {/* Banner de estado si no está activo */}
+        {vehicle.estado !== "Activo" && (
+          <div className={`mb-6 rounded-2xl p-4 flex items-center justify-center gap-2 border shadow-sm ${
+            vehicle.estado === "Vendido" ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-amber-50 border-amber-200 text-amber-800"
+          }`}>
+            <Tag className="h-5 w-5" />
+            <span className="font-semibold text-lg">
+              Este vehículo está actualmente marcado como {vehicle.estado}
+            </span>
+          </div>
+        )}
 
-          <CardContent>
-            {success ? (
-              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-6 text-center">
-                <div className="mb-3 text-4xl">✓</div>
-                <h3 className="text-lg font-bold text-emerald-900">¡Vehículo actualizado exitosamente!</h3>
-                <p className="text-sm text-emerald-700 mt-1">Redirigiendo al dashboard...</p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Sección: Imagen */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-slate-900">Imagen del vehículo</h3>
-                  {imagePreview ? (
-                    <div className="relative w-full">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-80 object-cover rounded-xl border border-slate-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Columna Izquierda: Imagen del vehículo */}
+          <div className="lg:col-span-7 space-y-6">
+            <div className="rounded-3xl overflow-hidden bg-white shadow-sm border border-slate-200 relative aspect-[4/3] group">
+              {vehicle.imagen ? (
+                <img
+                  src={vehicle.imagen}
+                  alt={`${vehicle.marca} ${vehicle.modelo}`}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex flex-col items-center justify-center">
+                  <Car className="h-24 w-24 text-slate-400 mb-4" />
+                  <p className="text-slate-500 font-medium">Sin imagen disponible</p>
+                </div>
+              )}
+            </div>
+
+            {/* Descripción */}
+            <Card className="border-0 shadow-sm rounded-3xl overflow-hidden">
+              <CardContent className="p-8">
+                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                  Descripción del Vehículo
+                </h3>
+                <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                  {vehicle.descripcion ? (
+                    <p className="whitespace-pre-wrap">{vehicle.descripcion}</p>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-100 transition">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-12 w-12 text-slate-400 mb-2" />
-                        <p className="text-sm text-slate-700 font-medium">Haz clic para cargar una imagen</p>
-                        <p className="text-xs text-slate-500">PNG, JPG, GIF (máx. 5MB)</p>
-                      </div>
-                      <input
-                        type="file"
-                        name="imagen"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </label>
+                    <p className="italic text-slate-400">El vendedor no proporcionó una descripción para este vehículo.</p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                {/* Sección: Información del vehículo */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-slate-900">Información del vehículo</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Marca */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Marca <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="marca"
-                        placeholder="Ej: Toyota, Chevrolet"
-                        value={formData.marca}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        required
-                      />
-                    </div>
+          {/* Columna Derecha: Detalles y Vendedor */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Tarjeta Principal de Precio y Modelo */}
+            <Card className="border-0 shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-6 pointer-events-none opacity-5">
+                <Car className="w-32 h-32" />
+              </div>
+              <CardContent className="p-8">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 font-medium text-xs mb-4">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Vehículo Verificado
+                </div>
+                
+                <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
+                  {vehicle.marca} <span className="font-light text-slate-500">{vehicle.modelo}</span>
+                </h1>
+                
+                <p className="text-5xl font-black text-blue-600 my-6 tracking-tighter">
+                  {formatCurrency(vehicle.precio)}
+                </p>
 
-                    {/* Modelo */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Modelo <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="modelo"
-                        placeholder="Ej: Corolla, Spark"
-                        value={formData.modelo}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        required
-                      />
-                    </div>
-
-                    {/* Año */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Año <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        name="año"
-                        min="1900"
-                        max={new Date().getFullYear()}
-                        value={formData.año}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        required
-                      />
-                    </div>
-
-                    {/* Precio */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Precio (COP) <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                        <input
-                          type="number"
-                          name="precio"
-                          placeholder="50000000"
-                          value={formData.precio}
-                          onChange={handleChange}
-                          className="w-full pl-8 pr-32 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                          required
-                        />
-                        {formData.precio && (
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-600 pointer-events-none">
-                            {formatPrecio(formData.precio)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Kilometraje */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Kilometraje (km)
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          name="kilometraje"
-                          placeholder="120000"
-                          value={formData.kilometraje}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        />
-                        {formData.kilometraje && (
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-600">
-                            {Number(formData.kilometraje).toLocaleString("es-CO")} km
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-100">
+                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                      <Calendar className="w-4 h-4" /> Año
+                    </span>
+                    <span className="text-xl font-bold text-slate-900">{vehicle.año}</span>
+                  </div>
+                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                      <Gauge className="w-4 h-4" /> Kilometraje
+                    </span>
+                    <span className="text-xl font-bold text-slate-900">
+                      {vehicle.kilometraje > 0 ? `${formatNumber(vehicle.kilometraje)} km` : '0 km'}
+                    </span>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Descripción */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Descripción
-                  </label>
-                  <textarea
-                    name="descripcion"
-                    placeholder="Describe el estado general del vehículo..."
-                    value={formData.descripcion}
-                    onChange={handleChange}
-                    rows={5}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition resize-none"
-                  />
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-                    <p className="text-sm text-red-800">{error}</p>
+            {/* Tarjeta de Información del Vendedor */}
+            <Card className="border-0 shadow-sm rounded-3xl overflow-hidden">
+              <CardContent className="p-8">
+                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+                  <User className="w-5 h-5 text-slate-400" />
+                  Información del Vendedor
+                </h3>
+                
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                    {vehicle.first_name ? vehicle.first_name.charAt(0) : 'V'}
                   </div>
-                )}
-
-                {/* Botones */}
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 h-12 rounded-xl"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Actualizando...
-                      </>
-                    ) : (
-                      "Actualizar vehículo"
+                  <div className="min-w-0 overflow-hidden">
+                    <p className="text-xl font-bold text-slate-900 truncate">{sellerName}</p>
+                    <a href={`mailto:${vehicle.email}`} className="text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1.5 mt-1.5 text-sm truncate">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{vehicle.email}</span>
+                    </a>
+                    {vehicle.phone && (
+                      <p className="text-slate-600 flex items-center gap-1.5 mt-1.5 text-sm truncate">
+                        <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{vehicle.phone}</span>
+                      </p>
                     )}
-                  </Button>
-                  <Link href="/protected" className="flex-1">
-                    <Button type="button" variant="outline" className="w-full h-12 rounded-xl">
-                      Cancelar
-                    </Button>
-                  </Link>
+                  </div>
                 </div>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </main>
     </div>
   )

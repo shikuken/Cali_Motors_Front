@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { VehicleSearch, Filters } from "@/components/ui/vehicle-search"
 import { useSignOut } from "@/app/auth/actions"
 import {
   Car,
@@ -69,11 +71,118 @@ function getVehicleImage(label: string) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
 }
 
+function VehicleGrid({ vehicles, loading, emptyMessage, isOwner }: { vehicles: any[], loading: boolean, emptyMessage: string, isOwner: boolean }) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8 bg-white rounded-xl shadow-sm border border-slate-200">
+        <p className="text-slate-500">Cargando vehículos...</p>
+      </div>
+    )
+  }
+
+  if (vehicles.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 bg-white rounded-xl shadow-sm border border-slate-200">
+        <Search className="h-12 w-12 text-slate-300 mb-3" />
+        <p className="text-slate-600 font-medium">{emptyMessage}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+      {vehicles.map((vehicle) => (
+        <Card key={vehicle.id} className="overflow-hidden border-0 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          {vehicle.imagen ? (
+            <div className="aspect-[16/10] overflow-hidden bg-slate-200">
+              <img
+                src={vehicle.imagen}
+                alt={`${vehicle.marca} ${vehicle.modelo}`}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="aspect-[16/10] bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center">
+              <Car className="h-16 w-16 text-slate-500" />
+            </div>
+          )}
+          <CardContent className="space-y-3 p-5">
+            <div>
+              <h3 className="text-lg font-bold">{vehicle.marca} {vehicle.modelo}</h3>
+              <p className="text-sm text-slate-500">{vehicle.año}</p>
+            </div>
+
+            <div>
+              <p className="text-2xl font-semibold text-slate-900">
+                ${Number(vehicle.precio).toLocaleString("es-CO")}
+              </p>
+            </div>
+
+            {vehicle.kilometraje > 0 && (
+              <div className="flex flex-wrap gap-2 text-sm text-slate-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1">
+                  <Gauge className="h-4 w-4" />
+                  {Number(vehicle.kilometraje).toLocaleString("es-CO")} km
+                </span>
+              </div>
+            )}
+
+            {vehicle.descripcion && (
+              <p className="text-sm text-slate-600 line-clamp-2">{vehicle.descripcion}</p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2 pt-3">
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  vehicle.estado === "Activo"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : vehicle.estado === "Vendido"
+                      ? "bg-slate-200 text-slate-700"
+                      : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {vehicle.estado}
+              </span>
+
+              {isOwner ? (
+                <Link href={`/vehicles/${vehicle.id}/edit`} className="ml-auto">
+                  <Button variant="outline" className="rounded-xl h-9 text-xs">
+                    <Pencil className="h-3 w-3 mr-1" />
+                    Editar
+                  </Button>
+                </Link>
+              ) : (
+                <Link href={`/vehicles/${vehicle.id}`} className="ml-auto">
+                  <Button variant="default" className="rounded-xl h-9 text-xs">
+                    <Eye className="h-3 w-3 mr-1" />
+                    Ver
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
 
 export function DashboardContent({ user }: { user: any }) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [filters, setFilters] = useState<Filters>({
+    marca: "",
+    minYear: "",
+    maxYear: "",
+    minPrice: "",
+    maxPrice: "",
+    estado: "",
+  })
+  
   const [userVehicles, setUserVehicles] = useState<any[]>([])
   const [loadingVehicles, setLoadingVehicles] = useState(true)
+  
+  const [allVehicles, setAllVehicles] = useState<any[]>([])
+  const [loadingAllVehicles, setLoadingAllVehicles] = useState(true)
   
   const { data: stats, isLoading } = useSWR("/api/dashboard/stats", fetcher)
   const handleSignOut = useSignOut()
@@ -82,7 +191,28 @@ export function DashboardContent({ user }: { user: any }) {
   const displayName = getDisplayName(user)
   const totalPublications = userVehicles.length
   const availableVehicles = userVehicles.filter((v) => v.estado === "Activo").length
-  const soldVehicles = userVehicles.filter((v) => v.estado === "Vendido").length
+  
+  const filterFn = (vehicle: any) => {
+    const searchLower = searchTerm.toLowerCase()
+    const matchesSearch = searchTerm === "" || 
+      vehicle.marca?.toLowerCase().includes(searchLower) ||
+      vehicle.modelo?.toLowerCase().includes(searchLower) ||
+      String(vehicle.año).includes(searchLower) ||
+      vehicle.descripcion?.toLowerCase().includes(searchLower)
+
+    const matchesBrand = filters.marca === "" || vehicle.marca === filters.marca
+    const matchesMinYear = filters.minYear === "" || vehicle.año >= parseInt(filters.minYear)
+    const matchesMaxYear = filters.maxYear === "" || vehicle.año <= parseInt(filters.maxYear)
+    const matchesMinPrice = filters.minPrice === "" || vehicle.precio >= parseInt(filters.minPrice)
+    const matchesMaxPrice = filters.maxPrice === "" || vehicle.precio <= parseInt(filters.maxPrice)
+    const matchesEstado = filters.estado === "" || vehicle.estado === filters.estado
+
+    return matchesSearch && matchesBrand && matchesMinYear && matchesMaxYear && 
+           matchesMinPrice && matchesMaxPrice && matchesEstado
+  }
+
+  const filteredUserVehicles = userVehicles.filter(filterFn)
+  const filteredAllVehicles = allVehicles.filter(filterFn)
 
   useEffect(() => {
     const fetchUserVehicles = async () => {
@@ -98,9 +228,24 @@ export function DashboardContent({ user }: { user: any }) {
         setLoadingVehicles(false)
       }
     }
+    
+    const fetchAllVehicles = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/vehicles`)
+        if (response.ok) {
+          const data = await response.json()
+          setAllVehicles(data)
+        }
+      } catch (error) {
+        console.error("Error fetching all vehicles:", error)
+      } finally {
+        setLoadingAllVehicles(false)
+      }
+    }
 
     if (user?.id) {
       fetchUserVehicles()
+      fetchAllVehicles()
     }
   }, [user?.id])
 
@@ -119,16 +264,13 @@ export function DashboardContent({ user }: { user: any }) {
           </div>
 
           <div className="flex flex-1 flex-col gap-3 lg:max-w-4xl lg:flex-row lg:items-center lg:justify-end">
-            <div className="relative w-full lg:max-w-xl">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Buscar vehículos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
-              />
-            </div>
+            <VehicleSearch 
+              allVehicles={allVehicles} 
+              onSearchChange={(term, newFilters) => {
+                setSearchTerm(term)
+                setFilters(newFilters)
+              }} 
+            />
 
             <Button asChild className="h-11 rounded-xl px-5">
               <Link href="/vehicles/new">
@@ -169,7 +311,7 @@ export function DashboardContent({ user }: { user: any }) {
                 <Car className="h-5 w-5" />
               </div>
               <div> 
-                <p className="text-sm text-slate-500">Publicaciones</p>
+                <p className="text-sm text-slate-500">Mis Publicaciones</p>
                 <p className="text-2xl font-bold">{isLoading ? "..." : totalPublications}</p>
               </div>
             </CardContent>
@@ -181,7 +323,7 @@ export function DashboardContent({ user }: { user: any }) {
                 <Eye className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Vehículos activos</p>
+                <p className="text-sm text-slate-500">Mis Vehículos activos</p>
                 <p className="text-2xl font-bold">{isLoading ? "..." : availableVehicles}</p>
               </div>
             </CardContent>
@@ -189,91 +331,32 @@ export function DashboardContent({ user }: { user: any }) {
         </section>
 
         <section>
-          <Card className="border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle>Mis publicaciones</CardTitle>
-              <CardDescription>Resumen de las publicaciones realizadas por el usuario.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingVehicles ? (
-                <div className="flex items-center justify-center py-8">
-                  <p className="text-slate-500">Cargando vehículos...</p>
-                </div>
-              ) : userVehicles.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <Car className="h-12 w-12 text-slate-300 mb-3" />
-                  <p className="text-slate-600 font-medium">No has publicado vehículos aún</p>
-                  <p className="text-sm text-slate-500 mb-4">Comienza publicando tu primer vehículo</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {userVehicles.map((vehicle) => (
-                    <Card key={vehicle.id} className="overflow-hidden border-0 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                      {vehicle.imagen ? (
-                        <div className="aspect-[16/10] overflow-hidden bg-slate-200">
-                          <img
-                            src={vehicle.imagen}
-                            alt={`${vehicle.marca} ${vehicle.modelo}`}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="aspect-[16/10] bg-gradient-to-br from-slate-300 to-slate-400 flex items-center justify-center">
-                          <Car className="h-16 w-16 text-slate-500" />
-                        </div>
-                      )}
-                      <CardContent className="space-y-3 p-5">
-                        <div>
-                          <h3 className="text-lg font-bold">{vehicle.marca} {vehicle.modelo}</h3>
-                          <p className="text-sm text-slate-500">{vehicle.año}</p>
-                        </div>
+          <Tabs defaultValue="explore" className="w-full">
+            <div className="mb-4">
+              <TabsList className="bg-slate-200/50 p-1">
+                <TabsTrigger value="explore">Explorar Todos</TabsTrigger>
+                <TabsTrigger value="my-vehicles">Mis Publicaciones</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="explore" className="mt-0">
+              <VehicleGrid 
+                loading={loadingAllVehicles} 
+                vehicles={filteredAllVehicles} 
+                emptyMessage={searchTerm ? "No se encontraron resultados en explorar" : "No hay vehículos publicados por la comunidad"} 
+                isOwner={false}
+              />
+            </TabsContent>
 
-                        <div>
-                          <p className="text-2xl font-semibold text-slate-900">
-                            ${Number(vehicle.precio).toLocaleString("es-CO")}
-                          </p>
-                        </div>
-
-                        {vehicle.kilometraje > 0 && (
-                          <div className="flex flex-wrap gap-2 text-sm text-slate-500">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1">
-                              <Gauge className="h-4 w-4" />
-                              {Number(vehicle.kilometraje).toLocaleString("es-CO")} km
-                            </span>
-                          </div>
-                        )}
-
-                        {vehicle.descripcion && (
-                          <p className="text-sm text-slate-600 line-clamp-2">{vehicle.descripcion}</p>
-                        )}
-
-                        <div className="flex flex-wrap items-center gap-2 pt-3">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-medium ${
-                              vehicle.estado === "Activo"
-                                ? "bg-emerald-100 text-emerald-700"
-                                : vehicle.estado === "Vendido"
-                                  ? "bg-slate-200 text-slate-700"
-                                  : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {vehicle.estado}
-                          </span>
-
-                          <Link href={`/vehicles/${vehicle.id}/edit`}>
-                            <Button variant="outline" className="rounded-xl ml-auto h-9 text-xs">
-                              <Pencil className="h-3 w-3 mr-1" />
-                              Editar
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            <TabsContent value="my-vehicles" className="mt-0">
+              <VehicleGrid 
+                loading={loadingVehicles} 
+                vehicles={filteredUserVehicles} 
+                emptyMessage={searchTerm ? "No se encontraron resultados en tus vehículos" : "No has publicado vehículos aún"} 
+                isOwner={true}
+              />
+            </TabsContent>
+          </Tabs>
         </section>
       </main>
     </div>

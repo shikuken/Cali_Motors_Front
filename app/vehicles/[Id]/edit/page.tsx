@@ -25,6 +25,7 @@ export default function EditVehiclePage() {
     precio: "",
     kilometraje: "",
     descripcion: "",
+    estado: "Activo",
     imagen: null as File | string | null,
   })
 
@@ -37,6 +38,17 @@ export default function EditVehiclePage() {
         }
         const data = await response.json()
 
+        const user = localStorage.getItem("user")
+        if (!user) {
+          router.push("/auth/login")
+          return
+        }
+        const userData = JSON.parse(user)
+        if (data.user_id !== userData.id) {
+          setError("No tienes permiso para editar este vehículo")
+          return
+        }
+
         setFormData({
           marca: data.marca || "",
           modelo: data.modelo || "",
@@ -44,6 +56,7 @@ export default function EditVehiclePage() {
           precio: data.precio || "",
           kilometraje: data.kilometraje || "",
           descripcion: data.descripcion || "",
+          estado: data.estado || "Activo",
           imagen: data.imagen || null
         })
         if (data.imagen) {
@@ -151,6 +164,7 @@ export default function EditVehiclePage() {
           precio: formData.precio,
           kilometraje: formData.kilometraje || 0,
           descripcion: formData.descripcion,
+          estado: formData.estado,
           imagen: imagenBase64,
         }),
       })
@@ -361,6 +375,24 @@ export default function EditVehiclePage() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Estado */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Estado de la publicación <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="estado"
+                    value={formData.estado}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-slate-400 focus:bg-white focus:outline-none transition"
+                    required
+                  >
+                    <option value="Activo">Activo</option>
+                    <option value="Vendido">Vendido</option>
+                    <option value="Pausado">Pausado</option>
+                  </select>
                 </div>
 
                 {/* Descripción */}
