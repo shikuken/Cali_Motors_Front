@@ -251,57 +251,60 @@ export function DashboardContent({ user }: { user: any }) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-800 bg-slate-900 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
-              <Car className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-white">Cali Motors</p>
-              <p className="text-sm text-white">Compra y venta de vehículos</p>
-            </div>
+     <header className="border-b border-slate-800 bg-slate-900 backdrop-blur">
+  <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+    <div className="flex items-center gap-6">
+      <Link href="/profile" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm lg:min-w-[180px] hover:bg-slate-50 transition">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+            <User className="h-4 w-4" />
           </div>
-
-          <div className="flex flex-1 flex-col gap-3 lg:max-w-4xl lg:flex-row lg:items-center lg:justify-end">
-            <VehicleSearch 
-              allVehicles={allVehicles} 
-              onSearchChange={(term, newFilters) => {
-                setSearchTerm(term)
-                setFilters(newFilters)
-              }} 
-            />
-
-            <Button asChild className="h-11 rounded-xl px-5">
-              <Link href="/vehicles/new">
-                <Plus className="h-4 w-4" />
-                Publicar vehículo
-              </Link>
-            </Button>
-
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm lg:min-w-[180px]">
-              <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-                  <User className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">{displayName}</p>
-                  <p className="text-xs text-slate-500">Mi perfil</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="cursor-pointer rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-                aria-label="Cerrar sesión"
-                title="Cerrar sesión"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
+          <div>
+            <p className="text-sm font-semibold">{displayName}</p>
+            <p className="text-xs text-slate-500">Mi perfil</p>
           </div>
         </div>
-      </header>
+      </Link>
+
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+          <Car className="h-5 w-5" />
+        </div>
+        <div>
+          <p className="text-lg font-bold text-white">Cali Motors</p>
+          <p className="text-sm text-white">Compra y venta de vehículos</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
+      <VehicleSearch 
+        allVehicles={allVehicles} 
+        onSearchChange={(term, newFilters) => {
+          setSearchTerm(term)
+          setFilters(newFilters)
+        }} 
+      />
+
+      <Button asChild className="h-11 rounded-xl px-5">
+        <Link href="/vehicles/new">
+          <Plus className="h-4 w-4" />
+          Publicar vehículo
+        </Link>
+      </Button>
+
+      <button
+        type="button"
+        onClick={handleSignOut}
+        className="cursor-pointer rounded-lg p-2 text-white transition hover:bg-slate-100 hover:text-slate-900"
+        aria-label="Cerrar sesión"
+        title="Cerrar sesión"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
+    </div>
+  </div>
+</header>
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
