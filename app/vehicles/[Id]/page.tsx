@@ -20,7 +20,7 @@ export default function VehicleDetailPage() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/vehicles/${vehicleId}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`)
         if (!response.ok) {
           throw new Error("Vehículo no encontrado")
         }

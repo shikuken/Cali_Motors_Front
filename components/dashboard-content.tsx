@@ -217,7 +217,7 @@ export function DashboardContent({ user }: { user: any }) {
   useEffect(() => {
     const fetchUserVehicles = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/vehicles/user/${user.id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/user/${user.id}`)
         if (response.ok) {
           const data = await response.json()
           setUserVehicles(data)
@@ -231,7 +231,7 @@ export function DashboardContent({ user }: { user: any }) {
     
     const fetchAllVehicles = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/vehicles`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`)
         if (response.ok) {
           const data = await response.json()
           setAllVehicles(data)

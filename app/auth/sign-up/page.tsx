@@ -79,7 +79,7 @@ export default function Page() {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,10 +102,10 @@ export default function Page() {
 
       // Guardar datos del usuario en localStorage (opcional)
       localStorage.setItem('user', JSON.stringify({ 
+        id: data.userId,
         email, 
         firstName, 
         lastName,
-        userId: data.userId 
       }))
 
       router.push('/auth/sign-up-success')

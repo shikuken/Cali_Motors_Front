@@ -32,7 +32,7 @@ export default function EditVehiclePage() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/vehicles/${vehicleId}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`)
         if (!response.ok) {
           throw new Error("No se pudo cargar la información del vehículo")
         }
@@ -151,7 +151,7 @@ export default function EditVehiclePage() {
         })
       }
 
-      const response = await fetch(`http://localhost:3001/vehicles/${vehicleId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
