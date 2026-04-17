@@ -1,8 +1,8 @@
 'use client'
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VehicleSearch, Filters } from "@/components/ui/vehicle-search"
@@ -13,10 +13,11 @@ import {
   Search,
   User,
   Gauge,
-  Calendar,
   Eye,
   Pencil,
   LogOut,
+  Trash2,
+  Loader2,
 } from "lucide-react"
 import useSWR from "swr"
 
@@ -39,39 +40,34 @@ function getDisplayName(user: any) {
   return "Juan"
 }
 
-function getVehicleImage(label: string) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360">
-      <defs>
-        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#111827" />
-          <stop offset="100%" stop-color="#374151" />
-        </linearGradient>
-        <linearGradient id="road" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#0f172a" />
-          <stop offset="100%" stop-color="#1e293b" />
-        </linearGradient>
-      </defs>
-      <rect width="600" height="360" fill="url(#bg)" rx="24" />
-      <rect y="250" width="600" height="110" fill="url(#road)" />
-      <circle cx="190" cy="250" r="36" fill="#111827" />
-      <circle cx="410" cy="250" r="36" fill="#111827" />
-      <circle cx="190" cy="250" r="18" fill="#9ca3af" />
-      <circle cx="410" cy="250" r="18" fill="#9ca3af" />
-      <path d="M140 210 L190 150 H360 C392 150 420 163 440 190 L470 210 Z" fill="#e5e7eb" opacity="0.95" />
-      <rect x="120" y="190" width="360" height="48" rx="18" fill="#f8fafc" />
-      <path d="M214 158 H350 C375 158 396 170 412 190 H196 Z" fill="#93c5fd" opacity="0.85" />
-      <circle cx="152" cy="214" r="8" fill="#f59e0b" />
-      <circle cx="448" cy="214" r="8" fill="#f87171" />
-      <text x="32" y="52" fill="#ffffff" font-family="Arial, sans-serif" font-size="28" font-weight="700">${label}</text>
-      <text x="32" y="88" fill="#d1d5db" font-family="Arial, sans-serif" font-size="18">Vehículo destacado</text>
-    </svg>
-  `
+function VehicleGrid({
+  vehicles,
+  loading,
+  emptyMessage,
+  isOwner,
+  onDelete,
+}: {
+  vehicles: any[]
+  loading: boolean
+  emptyMessage: string
+  isOwner: boolean
+  onDelete?: (id: number) => Promise<void>
+}) {
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [confirmId, setConfirmId] = useState<number | null>(null)
 
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
-}
+  const handleDeleteClick = (id: number) => {
+    setConfirmId(id)
+  }
 
-function VehicleGrid({ vehicles, loading, emptyMessage, isOwner }: { vehicles: any[], loading: boolean, emptyMessage: string, isOwner: boolean }) {
+  const handleConfirmDelete = async (id: number) => {
+    if (!onDelete) return
+    setDeletingId(id)
+    setConfirmId(null)
+    await onDelete(id)
+    setDeletingId(null)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8 bg-white rounded-xl shadow-sm border border-slate-200">
@@ -133,24 +129,61 @@ function VehicleGrid({ vehicles, loading, emptyMessage, isOwner }: { vehicles: a
 
             <div className="flex flex-wrap items-center gap-2 pt-3">
               <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  vehicle.estado === "Activo"
+                className={`rounded-full px-3 py-1 text-xs font-medium ${vehicle.estado === "Activo"
                     ? "bg-emerald-100 text-emerald-700"
                     : vehicle.estado === "Vendido"
                       ? "bg-slate-200 text-slate-700"
                       : "bg-amber-100 text-amber-700"
-                }`}
+                  }`}
               >
                 {vehicle.estado}
               </span>
 
               {isOwner ? (
-                <Link href={`/vehicles/${vehicle.id}/edit`} className="ml-auto">
-                  <Button variant="outline" className="rounded-xl h-9 text-xs">
-                    <Pencil className="h-3 w-3 mr-1" />
-                    Editar
-                  </Button>
-                </Link>
+                <div className="ml-auto flex items-center gap-2">
+                  {/* Confirmación de eliminación inline */}
+                  {confirmId === vehicle.id ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-slate-600 mr-1">¿Eliminar?</span>
+                      <Button
+                        variant="destructive"
+                        className="rounded-xl h-9 text-xs px-3"
+                        onClick={() => handleConfirmDelete(vehicle.id)}
+                        disabled={deletingId === vehicle.id}
+                      >
+                        Sí
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="rounded-xl h-9 text-xs px-3"
+                        onClick={() => setConfirmId(null)}
+                      >
+                        No
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="rounded-xl h-9 text-xs border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                        onClick={() => handleDeleteClick(vehicle.id)}
+                        disabled={deletingId === vehicle.id}
+                      >
+                        {deletingId === vehicle.id ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3 w-3" />
+                        )}
+                      </Button>
+                      <Link href={`/vehicles/${vehicle.id}/edit`}>
+                        <Button variant="outline" className="rounded-xl h-9 text-xs">
+                          <Pencil className="h-3 w-3 mr-1" />
+                          Editar
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </div>
               ) : (
                 <Link href={`/vehicles/${vehicle.id}`} className="ml-auto">
                   <Button variant="default" className="rounded-xl h-9 text-xs">
@@ -177,24 +210,24 @@ export function DashboardContent({ user }: { user: any }) {
     maxPrice: "",
     estado: "",
   })
-  
+
   const [userVehicles, setUserVehicles] = useState<any[]>([])
   const [loadingVehicles, setLoadingVehicles] = useState(true)
-  
+
   const [allVehicles, setAllVehicles] = useState<any[]>([])
   const [loadingAllVehicles, setLoadingAllVehicles] = useState(true)
-  
+
   const { data: stats, isLoading } = useSWR("/api/dashboard/stats", fetcher)
   const handleSignOut = useSignOut()
 
-  const dashboardData = stats?.data
   const displayName = getDisplayName(user)
   const totalPublications = userVehicles.length
   const availableVehicles = userVehicles.filter((v) => v.estado === "Activo").length
-  
+
   const filterFn = (vehicle: any) => {
     const searchLower = searchTerm.toLowerCase()
-    const matchesSearch = searchTerm === "" || 
+    const matchesSearch =
+      searchTerm === "" ||
       vehicle.marca?.toLowerCase().includes(searchLower) ||
       vehicle.modelo?.toLowerCase().includes(searchLower) ||
       String(vehicle.año).includes(searchLower) ||
@@ -207,104 +240,120 @@ export function DashboardContent({ user }: { user: any }) {
     const matchesMaxPrice = filters.maxPrice === "" || vehicle.precio <= parseInt(filters.maxPrice)
     const matchesEstado = filters.estado === "" || vehicle.estado === filters.estado
 
-    return matchesSearch && matchesBrand && matchesMinYear && matchesMaxYear && 
-           matchesMinPrice && matchesMaxPrice && matchesEstado
+    return matchesSearch && matchesBrand && matchesMinYear && matchesMaxYear && matchesMinPrice && matchesMaxPrice && matchesEstado
   }
 
   const filteredUserVehicles = userVehicles.filter(filterFn)
   const filteredAllVehicles = allVehicles.filter(filterFn)
 
-  useEffect(() => {
-    const fetchUserVehicles = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/user/${user.id}`)
-        if (response.ok) {
-          const data = await response.json()
-          setUserVehicles(data)
-        }
-      } catch (error) {
-        console.error("Error fetching vehicles:", error)
-      } finally {
-        setLoadingVehicles(false)
+  const fetchUserVehicles = useCallback(async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/user/${user.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        setUserVehicles(data)
       }
+    } catch (error) {
+      console.error("Error fetching vehicles:", error)
+    } finally {
+      setLoadingVehicles(false)
     }
-    
-    const fetchAllVehicles = async () => {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`)
-        if (response.ok) {
-          const data = await response.json()
-          setAllVehicles(data)
-        }
-      } catch (error) {
-        console.error("Error fetching all vehicles:", error)
-      } finally {
-        setLoadingAllVehicles(false)
-      }
-    }
+  }, [user.id])
 
+  const fetchAllVehicles = useCallback(async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`)
+      if (response.ok) {
+        const data = await response.json()
+        setAllVehicles(data)
+      }
+    } catch (error) {
+      console.error("Error fetching all vehicles:", error)
+    } finally {
+      setLoadingAllVehicles(false)
+    }
+  }, [])
+
+  useEffect(() => {
     if (user?.id) {
       fetchUserVehicles()
       fetchAllVehicles()
     }
-  }, [user?.id])
+  }, [user?.id, fetchUserVehicles, fetchAllVehicles])
+
+  const handleDeleteVehicle = async (vehicleId: number) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`, {
+        method: "DELETE",
+      })
+      if (response.ok) {
+        // Actualizar ambas listas localmente sin refetch
+        setUserVehicles((prev) => prev.filter((v) => v.id !== vehicleId))
+        setAllVehicles((prev) => prev.filter((v) => v.id !== vehicleId))
+      } else {
+        console.error("Error al eliminar el vehículo")
+      }
+    } catch (error) {
+      console.error("Error al eliminar:", error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-     <header className="border-b border-slate-800 bg-slate-900 backdrop-blur">
-  <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-    <div className="flex items-center gap-6">
-      <Link href="/profile" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm lg:min-w-[180px] hover:bg-slate-50 transition">
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-            <User className="h-4 w-4" />
+      <header className="border-b border-slate-800 bg-slate-900 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+          <div className="flex items-center gap-6">
+            <Link href="/profile" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm lg:min-w-[180px] hover:bg-slate-50 transition">
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                  <User className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{displayName}</p>
+                  <p className="text-xs text-slate-500">Mi perfil</p>
+                </div>
+              </div>
+            </Link>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+                <Car className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-white">Cali Motors</p>
+                <p className="text-sm text-white">Compra y venta de vehículos</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold">{displayName}</p>
-            <p className="text-xs text-slate-500">Mi perfil</p>
+
+          <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
+            <VehicleSearch
+              allVehicles={allVehicles}
+              onSearchChange={(term, newFilters) => {
+                setSearchTerm(term)
+                setFilters(newFilters)
+              }}
+            />
+
+            <Button asChild className="h-11 rounded-xl px-5">
+              <Link href="/vehicles/new">
+                <Plus className="h-4 w-4" />
+                Publicar vehículo
+              </Link>
+            </Button>
+
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="cursor-pointer rounded-lg p-2 text-white transition hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Cerrar sesión"
+              title="Cerrar sesión"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
-      </Link>
-
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
-          <Car className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="text-lg font-bold text-white">Cali Motors</p>
-          <p className="text-sm text-white">Compra y venta de vehículos</p>
-        </div>
-      </div>
-    </div>
-
-    <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
-      <VehicleSearch 
-        allVehicles={allVehicles} 
-        onSearchChange={(term, newFilters) => {
-          setSearchTerm(term)
-          setFilters(newFilters)
-        }} 
-      />
-
-      <Button asChild className="h-11 rounded-xl px-5">
-        <Link href="/vehicles/new">
-          <Plus className="h-4 w-4" />
-          Publicar vehículo
-        </Link>
-      </Button>
-
-      <button
-        type="button"
-        onClick={handleSignOut}
-        className="cursor-pointer rounded-lg p-2 text-white transition hover:bg-slate-100 hover:text-slate-900"
-        aria-label="Cerrar sesión"
-        title="Cerrar sesión"
-      >
-        <LogOut className="h-4 w-4" />
-      </button>
-    </div>
-  </div>
-</header>
+      </header>
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -313,7 +362,7 @@ export function DashboardContent({ user }: { user: any }) {
               <div className="rounded-2xl bg-slate-100 p-3 text-slate-700">
                 <Car className="h-5 w-5" />
               </div>
-              <div> 
+              <div>
                 <p className="text-sm text-slate-500">Mis Publicaciones</p>
                 <p className="text-2xl font-bold">{isLoading ? "..." : totalPublications}</p>
               </div>
@@ -341,22 +390,23 @@ export function DashboardContent({ user }: { user: any }) {
                 <TabsTrigger value="my-vehicles">Mis Publicaciones</TabsTrigger>
               </TabsList>
             </div>
-            
+
             <TabsContent value="explore" className="mt-0">
-              <VehicleGrid 
-                loading={loadingAllVehicles} 
-                vehicles={filteredAllVehicles} 
-                emptyMessage={searchTerm ? "No se encontraron resultados en explorar" : "No hay vehículos publicados por la comunidad"} 
+              <VehicleGrid
+                loading={loadingAllVehicles}
+                vehicles={filteredAllVehicles}
+                emptyMessage={searchTerm ? "No se encontraron resultados en explorar" : "No hay vehículos publicados por la comunidad"}
                 isOwner={false}
               />
             </TabsContent>
 
             <TabsContent value="my-vehicles" className="mt-0">
-              <VehicleGrid 
-                loading={loadingVehicles} 
-                vehicles={filteredUserVehicles} 
-                emptyMessage={searchTerm ? "No se encontraron resultados en tus vehículos" : "No has publicado vehículos aún"} 
+              <VehicleGrid
+                loading={loadingVehicles}
+                vehicles={filteredUserVehicles}
+                emptyMessage={searchTerm ? "No se encontraron resultados en tus vehículos" : "No has publicado vehículos aún"}
                 isOwner={true}
+                onDelete={handleDeleteVehicle}
               />
             </TabsContent>
           </Tabs>
