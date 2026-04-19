@@ -20,8 +20,9 @@ import {
   Loader2,
 } from "lucide-react"
 import useSWR from "swr"
+import { fetchWithAuth } from "@/lib/api"
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
+const fetcher = (url: string) => fetchWithAuth(url).then((res) => res.json())
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value)
@@ -130,10 +131,10 @@ function VehicleGrid({
             <div className="flex flex-wrap items-center gap-2 pt-3">
               <span
                 className={`rounded-full px-3 py-1 text-xs font-medium ${vehicle.estado === "Activo"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : vehicle.estado === "Vendido"
-                      ? "bg-slate-200 text-slate-700"
-                      : "bg-amber-100 text-amber-700"
+                  ? "bg-emerald-100 text-emerald-700"
+                  : vehicle.estado === "Vendido"
+                    ? "bg-slate-200 text-slate-700"
+                    : "bg-amber-100 text-amber-700"
                   }`}
               >
                 {vehicle.estado}
@@ -248,7 +249,7 @@ export function DashboardContent({ user }: { user: any }) {
 
   const fetchUserVehicles = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/user/${user.id}`)
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/user/${user.id}`)
       if (response.ok) {
         const data = await response.json()
         setUserVehicles(data)
@@ -262,7 +263,7 @@ export function DashboardContent({ user }: { user: any }) {
 
   const fetchAllVehicles = useCallback(async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`)
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`)
       if (response.ok) {
         const data = await response.json()
         setAllVehicles(data)
@@ -283,7 +284,7 @@ export function DashboardContent({ user }: { user: any }) {
 
   const handleDeleteVehicle = async (vehicleId: number) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`, {
         method: "DELETE",
       })
       if (response.ok) {

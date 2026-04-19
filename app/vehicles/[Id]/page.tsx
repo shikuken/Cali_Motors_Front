@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2 } from "lucide-react"
+import { fetchWithAuth } from "@/lib/api"
 
 export default function VehicleDetailPage() {
   const params = useParams()
@@ -20,7 +21,7 @@ export default function VehicleDetailPage() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`)
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`)
         if (!response.ok) {
           throw new Error("Vehículo no encontrado")
         }
@@ -70,7 +71,7 @@ export default function VehicleDetailPage() {
     return new Intl.NumberFormat("es-CO").format(value)
   }
 
-  const sellerName = vehicle.first_name && vehicle.last_name 
+  const sellerName = vehicle.first_name && vehicle.last_name
     ? `${vehicle.first_name} ${vehicle.last_name}`
     : "Vendedor"
 
@@ -99,9 +100,8 @@ export default function VehicleDetailPage() {
       <main className="mx-auto max-w-7xl px-4 pt-8 lg:px-8">
         {/* Banner de estado si no está activo */}
         {vehicle.estado !== "Activo" && (
-          <div className={`mb-6 rounded-2xl p-4 flex items-center justify-center gap-2 border shadow-sm ${
-            vehicle.estado === "Vendido" ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-amber-50 border-amber-200 text-amber-800"
-          }`}>
+          <div className={`mb-6 rounded-2xl p-4 flex items-center justify-center gap-2 border shadow-sm ${vehicle.estado === "Vendido" ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-amber-50 border-amber-200 text-amber-800"
+            }`}>
             <Tag className="h-5 w-5" />
             <span className="font-semibold text-lg">
               Este vehículo está actualmente marcado como {vehicle.estado}
@@ -157,11 +157,11 @@ export default function VehicleDetailPage() {
                   <CheckCircle2 className="w-4 h-4" />
                   Vehículo Verificado
                 </div>
-                
+
                 <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
                   {vehicle.marca} <span className="font-light text-slate-500">{vehicle.modelo}</span>
                 </h1>
-                
+
                 <p className="text-5xl font-black text-blue-600 my-6 tracking-tighter">
                   {formatCurrency(vehicle.precio)}
                 </p>
@@ -192,7 +192,7 @@ export default function VehicleDetailPage() {
                   <User className="w-5 h-5 text-slate-400" />
                   Información del Vendedor
                 </h3>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="h-16 w-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-md">
                     {vehicle.first_name ? vehicle.first_name.charAt(0) : 'V'}

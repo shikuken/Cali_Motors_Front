@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+import { fetchWithAuth } from "@/lib/api"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -30,12 +31,12 @@ export default function ProfilePage() {
           router.push('/auth/login')
           return
         }
-        
+
         const userData = JSON.parse(storedUser)
         setUser(userData)
-        
+
         // Obtener datos frescos desde el servidor
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userData.id}`)
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/users/${userData.id}`)
         if (response.ok) {
           const freshData = await response.json()
           const fullName = `${freshData.first_name || ''} ${freshData.last_name || ''}`.trim()
@@ -44,7 +45,7 @@ export default function ProfilePage() {
             email: freshData.email || userData.email || '',
             phone: freshData.phone || '',
           })
-          
+
           // Actualizar localStorage
           const updatedUser = {
             ...userData,
@@ -65,12 +66,12 @@ export default function ProfilePage() {
         // Intentar usar lo que haya en local
         const storedUser = localStorage.getItem('user')
         if (storedUser) {
-           const userData = JSON.parse(storedUser)
-           setFormData({
-             name: userData.name || '',
-             email: userData.email || '',
-             phone: userData.phone || '',
-           })
+          const userData = JSON.parse(storedUser)
+          setFormData({
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+          })
         } else {
           router.push('/auth/login')
         }
@@ -104,7 +105,7 @@ export default function ProfilePage() {
       const firstName = nameParts[0] || ''
       const lastName = nameParts.slice(1).join(' ') || ''
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -119,13 +120,13 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setSuccessMessage('Perfil actualizado correctamente')
-        
+
         // Actualizar datos locales
         const updatedUser = {
-            ...user,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone
+          ...user,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
         }
         localStorage.setItem('user', JSON.stringify(updatedUser))
 

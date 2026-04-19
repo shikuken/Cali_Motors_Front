@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Car, ArrowLeft, Loader2, Upload, X } from "lucide-react"
+import { fetchWithAuth } from "@/lib/api"
 
 export default function EditVehiclePage() {
   const router = useRouter()
@@ -32,7 +33,7 @@ export default function EditVehiclePage() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`)
+        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`)
         if (!response.ok) {
           throw new Error("No se pudo cargar la información del vehículo")
         }
@@ -151,7 +152,7 @@ export default function EditVehiclePage() {
         })
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

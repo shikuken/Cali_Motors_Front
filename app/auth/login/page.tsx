@@ -48,6 +48,9 @@ export default function Page() {
 
       // Guardamos info básica de sesión en localStorage para persistencia simple
       localStorage.setItem('user', JSON.stringify(data.user))
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+      }
 
       // Redirección a la página protegida
       router.push('/protected')

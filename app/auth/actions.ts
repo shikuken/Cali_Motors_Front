@@ -7,6 +7,7 @@ export function useSignOut() {
 
   const handleSignOut = () => {
     localStorage.removeItem("user")
+    localStorage.removeItem("token")
     router.push("/auth/login")
   }
 

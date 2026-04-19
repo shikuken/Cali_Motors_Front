@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Car, ArrowLeft, Loader2, Upload, X } from "lucide-react"
+import { fetchWithAuth } from "@/lib/api"
 
 export default function PublishVehiclePage() {
   const router = useRouter()
@@ -101,7 +102,7 @@ export default function PublishVehiclePage() {
         })
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
