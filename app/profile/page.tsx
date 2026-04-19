@@ -33,14 +33,47 @@ export default function ProfilePage() {
         
         const userData = JSON.parse(storedUser)
         setUser(userData)
-        setFormData({
-          name: userData.name || '',
-          email: userData.email || '',
-          phone: userData.phone || '',
-        })
+        
+        // Obtener datos frescos desde el servidor
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userData.id}`)
+        if (response.ok) {
+          const freshData = await response.json()
+          const fullName = `${freshData.first_name || ''} ${freshData.last_name || ''}`.trim()
+          setFormData({
+            name: fullName,
+            email: freshData.email || userData.email || '',
+            phone: freshData.phone || '',
+          })
+          
+          // Actualizar localStorage
+          const updatedUser = {
+            ...userData,
+            name: fullName,
+            email: freshData.email || userData.email || '',
+            phone: freshData.phone || '',
+          }
+          localStorage.setItem('user', JSON.stringify(updatedUser))
+        } else {
+          setFormData({
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+          })
+        }
       } catch (error) {
         console.error('Error fetching user:', error)
-        router.push('/auth/login')
+        // Intentar usar lo que haya en local
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+           const userData = JSON.parse(storedUser)
+           setFormData({
+             name: userData.name || '',
+             email: userData.email || '',
+             phone: userData.phone || '',
+           })
+        } else {
+          router.push('/auth/login')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -67,13 +100,18 @@ export default function ProfilePage() {
     setSuccessMessage('')
 
     try {
+      const nameParts = formData.name.trim().split(' ')
+      const firstName = nameParts[0] || ''
+      const lastName = nameParts.slice(1).join(' ') || ''
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${user.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          firstName,
+          lastName,
           email: formData.email,
           phone: formData.phone,
         }),
@@ -81,12 +119,29 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setSuccessMessage('Perfil actualizado correctamente')
+        
+        // Actualizar datos locales
+        const updatedUser = {
+            ...user,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone
+        }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+
         setTimeout(() => {
           router.push('/protected')
         }, 1500)
       } else {
-        const error = await response.json()
-        setErrorMessage(error.message || 'Error al actualizar el perfil')
+        const contentType = response.headers.get("content-type")
+        let errorMsg = 'Error al actualizar el perfil'
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const error = await response.json()
+          errorMsg = error.message || errorMsg
+        } else {
+          errorMsg = await response.text()
+        }
+        setErrorMessage(errorMsg)
       }
     } catch (error) {
       console.error('Error updating profile:', error)
@@ -153,7 +208,8 @@ export default function ProfilePage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="tu@email.com"
-                className="rounded-lg"
+                className="rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed"
+                disabled
               />
             </div>
 
