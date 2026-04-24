@@ -46,12 +46,14 @@ function VehicleGrid({
   loading,
   emptyMessage,
   isOwner,
+  isAdmin,
   onDelete,
 }: {
   vehicles: any[]
   loading: boolean
   emptyMessage: string
   isOwner: boolean
+  isAdmin?: boolean
   onDelete?: (id: number) => Promise<void>
 }) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
@@ -140,7 +142,7 @@ function VehicleGrid({
                 {vehicle.estado}
               </span>
 
-              {isOwner ? (
+              {isOwner || isAdmin ? (
                 <div className="ml-auto flex items-center gap-2">
                   {/* Confirmación de eliminación inline */}
                   {confirmId === vehicle.id ? (
@@ -310,7 +312,14 @@ export function DashboardContent({ user }: { user: any }) {
                   <User className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">{displayName}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold">{displayName}</p>
+                    {user?.rol === 'admin' && (
+                      <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700">
+                        Admin
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-500">Mi perfil</p>
                 </div>
               </div>
@@ -398,6 +407,8 @@ export function DashboardContent({ user }: { user: any }) {
                 vehicles={filteredAllVehicles}
                 emptyMessage={searchTerm ? "No se encontraron resultados en explorar" : "No hay vehículos publicados por la comunidad"}
                 isOwner={false}
+                isAdmin={user?.rol === 'admin'}
+                onDelete={handleDeleteVehicle}
               />
             </TabsContent>
 

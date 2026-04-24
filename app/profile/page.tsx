@@ -19,6 +19,7 @@ export default function ProfilePage() {
     name: '',
     email: '',
     phone: '',
+    rol: '',
   })
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -44,6 +45,7 @@ export default function ProfilePage() {
             name: fullName,
             email: freshData.email || userData.email || '',
             phone: freshData.phone || '',
+            rol: freshData.rol || userData.rol || '',
           })
 
           // Actualizar localStorage
@@ -52,6 +54,7 @@ export default function ProfilePage() {
             name: fullName,
             email: freshData.email || userData.email || '',
             phone: freshData.phone || '',
+            rol: freshData.rol || userData.rol || '',
           }
           localStorage.setItem('user', JSON.stringify(updatedUser))
         } else {
@@ -59,6 +62,7 @@ export default function ProfilePage() {
             name: userData.name || '',
             email: userData.email || '',
             phone: userData.phone || '',
+            rol: userData.rol || '',
           })
         }
       } catch (error) {
@@ -71,6 +75,7 @@ export default function ProfilePage() {
             name: userData.name || '',
             email: userData.email || '',
             phone: userData.phone || '',
+            rol: userData.rol || '',
           })
         } else {
           router.push('/auth/login')
@@ -224,6 +229,18 @@ export default function ProfilePage() {
                 onChange={handleInputChange}
                 placeholder="+57 XXX XXX XXXX"
                 className="rounded-lg"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="rol">Rol</Label>
+              <Input
+                id="rol"
+                name="rol"
+                type="text"
+                value={formData.rol === 'admin' ? 'Administrador' : (formData.rol === 'usuario' ? 'Usuario' : formData.rol)}
+                className="rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed capitalize"
+                disabled
               />
             </div>
 

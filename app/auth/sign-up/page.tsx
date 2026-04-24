@@ -100,15 +100,23 @@ export default function Page() {
         throw new Error(data.message || 'Error al registrar el usuario')
       }
 
-      // Guardar datos del usuario en localStorage (opcional)
-      localStorage.setItem('user', JSON.stringify({ 
-        id: data.userId,
-        email, 
-        firstName, 
-        lastName,
-      }))
+      // Guardar datos del usuario y token en localStorage
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+      }
 
-      router.push('/auth/sign-up-success')
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user))
+      } else {
+        localStorage.setItem('user', JSON.stringify({
+          id: data.userId,
+          email,
+          firstName,
+          lastName,
+        }))
+      }
+
+      router.push('/protected')
     } catch (error: any) {
       setError(error.message || 'Ocurrió un error inesperado')
     } finally {
