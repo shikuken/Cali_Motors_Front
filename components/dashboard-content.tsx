@@ -313,7 +313,7 @@ export function DashboardContent({ user }: { user: any }) {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold">{displayName}</p>
+                    <p className="text-sm font-semibold text-slate-500">{displayName}</p>
                     {user?.rol === 'admin' && (
                       <span className="rounded bg-indigo-100 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700">
                         Admin

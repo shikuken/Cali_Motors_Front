@@ -4,24 +4,30 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --color-bar-top: #000000;
+  --color-input-bg: #a2efff;
+  --color-card-bg: #baf3ff;
+  --color-button-primary: #63bde7;
+  --color-button-secondary: #d0faff;
+  --color-page-bg: #ffffff;
+  --background: var(--color-page-bg);
+  --foreground: #000000;
+  --card: var(--color-card-bg);
+  --card-foreground: #000000;
+  --popover: var(--color-page-bg);
+  --popover-foreground: #000000;
+  --primary: var(--color-button-primary);
+  --primary-foreground: #000000;
+  --secondary: var(--color-button-secondary);
+  --secondary-foreground: #000000;
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: #baf3ff;
+  --input: var(--color-input-bg);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -29,48 +35,54 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar: var(--color-page-bg);
+  --sidebar-foreground: #000000;
+  --sidebar-primary: var(--color-button-primary);
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: var(--color-button-secondary);
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #baf3ff;
   --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --color-bar-top: #000000;
+  --color-input-bg: #baf3ff;
+  --color-card-bg: #baf3ff;
+  --color-button-primary: #63bde7;
+  --color-button-secondary: #d0faff;
+  --color-page-bg: #ffffff;
+  --background: var(--color-page-bg);
+  --foreground: #000000;
+  --card: var(--color-card-bg);
+  --card-foreground: #000000;
+  --popover: var(--color-page-bg);
+  --popover-foreground: #000000;
+  --primary: var(--color-button-primary);
+  --primary-foreground: #000000;
+  --secondary: var(--color-button-secondary);
+  --secondary-foreground: #000000;
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
+  --border: #baf3ff;
+  --input: var(--color-input-bg);
   --ring: oklch(0.439 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
+  --sidebar: var(--color-page-bg);
+  --sidebar-foreground: #000000;
+  --sidebar-primary: var(--color-button-primary);
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: var(--color-button-secondary);
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: #baf3ff;
   --sidebar-ring: oklch(0.439 0 0);
 }
 
@@ -122,6 +134,33 @@
   body {
     @apply bg-background text-foreground;
     background-image: none !important;
+  }
+  input,
+  textarea,
+  select {
+    background-color: var(--color-input-bg);
+  }
+  button {
+    background-color: var(--color-button-primary);
+    color: #000000;
+  }
+  button.secondary,
+  button[data-variant='secondary'],
+  button[data-variant='outline'] {
+    background-color: var(--color-button-secondary);
+    color: #000000;
+  }
+  .card {
+    background-color: var(--color-card-bg);
+  }
+  .navbar,
+  .header,
+  .topbar,
+  .toolbar,
+  header,
+  nav {
+    background-color: var(--color-bar-top);
+    color: #ffffff;
   }
 }
 

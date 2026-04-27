@@ -171,7 +171,7 @@ export function VehicleSearch({ allVehicles = [], onSearchChange }: VehicleSearc
             value={searchTerm}
             onChange={handleInputChange}
             onFocus={handleFocus}
-            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+            className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm outline-none transition focus:border-slate-400 focus:bg-white text-slate-500"
           />
           {searchTerm && (
             <button
