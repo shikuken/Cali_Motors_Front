@@ -19,6 +19,7 @@ import {
   Moon,
   Pencil,
   Plus,
+  Scale,
   Search,
   ShieldCheck,
   Sparkles,
@@ -29,6 +30,7 @@ import {
 } from "lucide-react"
 
 const fetcher = (url: string) => fetchWithAuth(url).then((res) => res.json())
+const compareStorageKey = "caliMotorsCompareVehicles"
 const nativeYearKey = "a" + String.fromCharCode(241) + "o"
 const mojibakeYearKey = "a" + String.fromCharCode(195, 177) + "o"
 
@@ -55,6 +57,24 @@ function getDisplayName(user: any) {
 
 function getVehicleYear(vehicle: any) {
   return vehicle[nativeYearKey] ?? vehicle[mojibakeYearKey] ?? "N/D"
+}
+
+function normalizeVehicleForCompare(vehicle: any) {
+  return {
+    id: vehicle.id,
+    marca: vehicle.marca,
+    modelo: vehicle.modelo,
+    precio: vehicle.precio,
+    year: getVehicleYear(vehicle),
+    kilometraje: vehicle.kilometraje,
+    estado: vehicle.estado,
+    imagen: vehicle.imagen,
+    descripcion: vehicle.descripcion,
+    first_name: vehicle.first_name,
+    last_name: vehicle.last_name,
+    email: vehicle.email,
+    phone: vehicle.phone,
+  }
 }
 
 function ThemeToggle() {
@@ -95,6 +115,8 @@ function VehicleGrid({
   isOwner,
   isAdmin,
   onDelete,
+  compareIds,
+  onToggleCompare,
 }: {
   vehicles: any[]
   loading: boolean
@@ -102,6 +124,8 @@ function VehicleGrid({
   isOwner: boolean
   isAdmin?: boolean
   onDelete?: (id: number) => Promise<void>
+  compareIds: Set<number>
+  onToggleCompare: (vehicle: any) => void
 }) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [confirmId, setConfirmId] = useState<number | null>(null)
@@ -141,7 +165,7 @@ function VehicleGrid({
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {vehicles.map((vehicle) => (
-        <Card key={vehicle.id} className="group flex min-h-[430px] overflow-hidden rounded-3xl border-slate-200 bg-white shadow-xl shadow-slate-200/60 premium-card-hover dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/20">
+        <Card key={vehicle.id} className="group flex min-h-[456px] overflow-hidden rounded-3xl border-slate-200 bg-white shadow-xl shadow-slate-200/60 premium-card-hover dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/20">
           <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
             {vehicle.imagen ? (
               <img
@@ -198,6 +222,20 @@ function VehicleGrid({
             </p>
 
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
+              <Button
+                type="button"
+                variant={compareIds.has(vehicle.id) ? "default" : "outline"}
+                className={`h-10 w-full rounded-xl font-bold ${
+                  compareIds.has(vehicle.id)
+                    ? "bg-slate-950 text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700"
+                    : "dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                }`}
+                onClick={() => onToggleCompare(vehicle)}
+              >
+                <Scale className="h-4 w-4" />
+                {compareIds.has(vehicle.id) ? "En comparador" : "Comparar"}
+              </Button>
+
               {isOwner || isAdmin ? (
                 confirmId === vehicle.id ? (
                   <div className="flex w-full items-center justify-between rounded-2xl bg-red-50 p-2 dark:bg-red-950/30">
@@ -316,6 +354,7 @@ export function DashboardContent({ user }: { user: any }) {
   const [loadingVehicles, setLoadingVehicles] = useState(true)
   const [allVehicles, setAllVehicles] = useState<any[]>([])
   const [loadingAllVehicles, setLoadingAllVehicles] = useState(true)
+  const [compareVehicles, setCompareVehicles] = useState<any[]>([])
   const { isLoading } = useSWR("/api/dashboard/stats", fetcher)
   const handleSignOut = useSignOut()
 
@@ -346,6 +385,32 @@ export function DashboardContent({ user }: { user: any }) {
 
   const filteredUserVehicles = userVehicles.filter(filterFn)
   const filteredAllVehicles = allVehicles.filter(filterFn)
+  const compareIds = useMemo(() => new Set(compareVehicles.map((vehicle) => vehicle.id)), [compareVehicles])
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(compareStorageKey)
+      if (saved) setCompareVehicles(JSON.parse(saved))
+    } catch {
+      setCompareVehicles([])
+    }
+  }, [])
+
+  const updateCompareVehicles = (vehiclesToCompare: any[]) => {
+    setCompareVehicles(vehiclesToCompare)
+    localStorage.setItem(compareStorageKey, JSON.stringify(vehiclesToCompare))
+  }
+
+  const handleToggleCompare = (vehicle: any) => {
+    const isSelected = compareIds.has(vehicle.id)
+    if (isSelected) {
+      updateCompareVehicles(compareVehicles.filter((item) => item.id !== vehicle.id))
+      return
+    }
+
+    const nextVehicles = [...compareVehicles, normalizeVehicleForCompare(vehicle)].slice(-3)
+    updateCompareVehicles(nextVehicles)
+  }
 
   const fetchUserVehicles = useCallback(async () => {
     try {
@@ -426,6 +491,12 @@ export function DashboardContent({ user }: { user: any }) {
                 Publicar vehiculo
               </Link>
             </Button>
+            <Button asChild variant="outline" className="h-11 rounded-2xl border-white/10 bg-white/10 px-5 font-bold text-white hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white">
+              <Link href="/vehicles/comparar">
+                <Scale className="h-4 w-4" />
+                Comparar {compareVehicles.length > 0 ? `(${compareVehicles.length})` : ""}
+              </Link>
+            </Button>
             <ThemeToggle />
             <button type="button" onClick={handleSignOut} className="rounded-2xl p-3 text-slate-300 transition hover:bg-white/10 hover:text-white dark:hover:bg-slate-800" aria-label="Cerrar sesion" title="Cerrar sesion">
               <LogOut className="h-4 w-4" />
@@ -476,6 +547,8 @@ export function DashboardContent({ user }: { user: any }) {
                 isOwner={false}
                 isAdmin={user?.rol === "admin"}
                 onDelete={handleDeleteVehicle}
+                compareIds={compareIds}
+                onToggleCompare={handleToggleCompare}
               />
             </TabsContent>
 
@@ -486,6 +559,8 @@ export function DashboardContent({ user }: { user: any }) {
                 emptyMessage={searchTerm ? "No se encontraron resultados en tus vehiculos" : "No has publicado vehiculos aun"}
                 isOwner
                 onDelete={handleDeleteVehicle}
+                compareIds={compareIds}
+                onToggleCompare={handleToggleCompare}
               />
             </TabsContent>
           </Tabs>
