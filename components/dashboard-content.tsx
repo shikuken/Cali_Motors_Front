@@ -12,10 +12,15 @@ import { fetchWithAuth } from "@/lib/api"
 import useSWR from "swr"
 import {
   Car,
+  ChevronDown,
+  ClipboardCheck,
+  FileText,
   Eye,
   Gauge,
+  Handshake,
   Loader2,
   LogOut,
+  MessageCircle,
   Moon,
   Pencil,
   Plus,
@@ -340,6 +345,117 @@ function FeaturedVehiclePopup({ vehicles }: { vehicles: any[] }) {
   )
 }
 
+const marketplaceTips = [
+  {
+    id: "comprar",
+    icon: ClipboardCheck,
+    title: "Antes de comprar",
+    badge: "Checklist rapido",
+    summary: "Mira historial, kilometraje, precio real y estado legal antes de agendar.",
+    bullets: [
+      "Compara 2 o 3 opciones antes de decidir.",
+      "Pide improntas, revision mecanica y prueba en frio.",
+      "Verifica multas, prenda, SOAT y tecnomecanica.",
+    ],
+    action: "Recomendado para compradores en Cali y todo Colombia.",
+  },
+  {
+    id: "documentos",
+    icon: FileText,
+    title: "Documentos necesarios",
+    badge: "Compra segura",
+    summary: "Ten listos los papeles clave para revisar propiedad y hacer traspaso.",
+    bullets: [
+      "Tarjeta de propiedad y cedulas de comprador/vendedor.",
+      "SOAT, tecnomecanica y paz y salvo de multas.",
+      "Contrato de compraventa y formulario de traspaso.",
+    ],
+    action: "Ideal revisarlo antes de separar dinero o viajar a ver el carro.",
+  },
+  {
+    id: "vender",
+    icon: Handshake,
+    title: "Vende con nosotros",
+    badge: "Publicacion fuerte",
+    summary: "Una buena publicacion vende confianza antes de vender el vehiculo.",
+    bullets: [
+      "Sube fotos limpias: exterior, interior, tablero y motor.",
+      "Escribe precio, ciudad, kilometraje y mantenimientos.",
+      "Responde rapido y propone puntos seguros para mostrarlo.",
+    ],
+    action: "Cali Motors te ayuda a mostrarlo claro y comparar mejor.",
+  },
+]
+
+function MarketplaceInfoPanel() {
+  const [activeCard, setActiveCard] = useState("comprar")
+
+  return (
+    <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+      <div className="rounded-[2rem] bg-slate-950 p-5 text-white shadow-2xl shadow-slate-300/50 dark:bg-slate-900 dark:shadow-slate-950/20">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-500/15 px-3 py-1 text-xs font-black text-blue-200">
+          <Sparkles className="h-3.5 w-3.5" />
+          Guia de compra
+        </div>
+        <h2 className="text-2xl font-black tracking-tight">Compra y vende con mas criterio</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          Tips cortos para tomar mejores decisiones en Cali y cualquier ciudad de Colombia.
+        </p>
+      </div>
+
+      <div className="grid gap-3">
+        {marketplaceTips.map((tip) => {
+          const Icon = tip.icon
+          const isActive = activeCard === tip.id
+
+          return (
+            <button
+              key={tip.id}
+              type="button"
+              onClick={() => setActiveCard(isActive ? "" : tip.id)}
+              className={`group rounded-3xl border bg-white p-4 text-left shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl dark:bg-slate-900 ${
+                isActive
+                  ? "border-blue-200 shadow-blue-100/70 dark:border-blue-900/70 dark:shadow-blue-950/10"
+                  : "border-slate-200 shadow-slate-200/60 dark:border-slate-800 dark:shadow-slate-950/20"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition ${isActive ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-wide text-blue-600 dark:text-blue-300">{tip.badge}</p>
+                      <h3 className="mt-1 text-base font-black text-slate-950 dark:text-slate-100">{tip.title}</h3>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-300 ${isActive ? "rotate-180" : ""}`} />
+                  </div>
+                  <p className="mt-2 text-sm leading-5 text-slate-600 dark:text-slate-400">{tip.summary}</p>
+                </div>
+              </div>
+
+              <div className={`grid transition-all duration-300 ${isActive ? "mt-4 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                <div className="overflow-hidden">
+                  <div className="space-y-2 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800/70">
+                    {tip.bullets.map((bullet) => (
+                      <div key={bullet} className="flex gap-2 text-sm leading-5 text-slate-700 dark:text-slate-300">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+                        <span>{bullet}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs font-semibold leading-5 text-slate-500 dark:text-slate-400">{tip.action}</p>
+                </div>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </aside>
+  )
+}
+
 export function DashboardContent({ user }: { user: any }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState<Filters>({
@@ -355,6 +471,7 @@ export function DashboardContent({ user }: { user: any }) {
   const [allVehicles, setAllVehicles] = useState<any[]>([])
   const [loadingAllVehicles, setLoadingAllVehicles] = useState(true)
   const [compareVehicles, setCompareVehicles] = useState<any[]>([])
+  const [unreadMessages, setUnreadMessages] = useState(0)
   const { isLoading } = useSWR("/api/dashboard/stats", fetcher)
   const handleSignOut = useSignOut()
 
@@ -434,12 +551,25 @@ export function DashboardContent({ user }: { user: any }) {
     }
   }, [])
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/notifications`)
+      if (response.ok) {
+        const data = await response.json()
+        setUnreadMessages(Number(data.unreadMessages || 0))
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error)
+    }
+  }, [])
+
   useEffect(() => {
     if (user?.id) {
       fetchUserVehicles()
       fetchAllVehicles()
+      fetchNotifications()
     }
-  }, [user?.id, fetchUserVehicles, fetchAllVehicles])
+  }, [user?.id, fetchUserVehicles, fetchAllVehicles, fetchNotifications])
 
   const handleDeleteVehicle = async (vehicleId: number) => {
     try {
@@ -497,6 +627,17 @@ export function DashboardContent({ user }: { user: any }) {
                 Comparar {compareVehicles.length > 0 ? `(${compareVehicles.length})` : ""}
               </Link>
             </Button>
+            <Button asChild variant="outline" className="relative h-11 rounded-2xl border-white/10 bg-white/10 px-5 font-bold text-white hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white">
+              <Link href="/chats">
+                <MessageCircle className="h-4 w-4" />
+                Chats
+                {unreadMessages > 0 && (
+                  <span className="absolute -right-1 -top-1 rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
+                    {unreadMessages}
+                  </span>
+                )}
+              </Link>
+            </Button>
             <ThemeToggle />
             <button type="button" onClick={handleSignOut} className="rounded-2xl p-3 text-slate-300 transition hover:bg-white/10 hover:text-white dark:hover:bg-slate-800" aria-label="Cerrar sesion" title="Cerrar sesion">
               <LogOut className="h-4 w-4" />
@@ -525,7 +666,9 @@ export function DashboardContent({ user }: { user: any }) {
           </div>
         </section>
 
-        <section>
+        <section className="grid gap-6 lg:grid-cols-[340px_1fr]">
+          <MarketplaceInfoPanel />
+
           <Tabs defaultValue="explore" className="w-full">
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <TabsList className="h-12 rounded-2xl bg-white p-1 shadow-lg shadow-slate-200/70 dark:bg-slate-900 dark:shadow-slate-950/20">

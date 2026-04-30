@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, ShoppingCart, Banknote, ShieldCheck } from "lucide-react"
+import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, ShoppingCart, Banknote, ShieldCheck, MessageCircle } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api"
 
 export default function VehicleDetailPage() {
@@ -17,6 +17,8 @@ export default function VehicleDetailPage() {
   const [loading, setLoading] = useState(true)
   const [vehicle, setVehicle] = useState<any>(null)
   const [error, setError] = useState("")
+  const [chatError, setChatError] = useState("")
+  const [startingChat, setStartingChat] = useState(false)
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -77,6 +79,40 @@ export default function VehicleDetailPage() {
   const sellerName = vehicle.first_name && vehicle.last_name
     ? `${vehicle.first_name} ${vehicle.last_name}`
     : "Vendedor"
+
+  const handleStartChat = async () => {
+    if (!vehicle?.user_id) {
+      setChatError("No se pudo identificar al vendedor de este vehiculo.")
+      return
+    }
+
+    setChatError("")
+    setStartingChat(true)
+
+    try {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/conversations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vehicleId: Number(vehicleId),
+          sellerId: Number(vehicle.user_id),
+          message: `Hola, me interesa el ${vehicle.marca} ${vehicle.modelo}. ¿Sigue disponible?`,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.message || "No se pudo iniciar el chat")
+      }
+
+      router.push(`/chats?conversationId=${data.conversation.id}`)
+    } catch (err) {
+      setChatError(err instanceof Error ? err.message : "No se pudo iniciar el chat")
+    } finally {
+      setStartingChat(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-16">
@@ -233,6 +269,22 @@ export default function VehicleDetailPage() {
                     )}
                   </div>
                 </div>
+
+                {chatError && (
+                  <p className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                    {chatError}
+                  </p>
+                )}
+
+                <Button
+                  type="button"
+                  onClick={handleStartChat}
+                  disabled={startingChat}
+                  className="mt-6 h-12 w-full rounded-2xl bg-slate-950 font-bold text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
+                >
+                  {startingChat ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+                  Enviar mensaje
+                </Button>
               </CardContent>
             </Card>
           </div>
