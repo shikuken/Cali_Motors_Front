@@ -186,7 +186,7 @@ export default function Page() {
                             key={`${country.flag}-${country.code}-${country.name}`}
                             value={country.code}
                           >
-                            {country.flag} {country.code} {country.name}
+                            {country.flag} {country.code}
                           </option>
                         ))}
                       </select>
