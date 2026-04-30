@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2 } from "lucide-react"
+import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, ShoppingCart, Banknote, ShieldCheck } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api"
 
 export default function VehicleDetailPage() {
@@ -63,9 +63,12 @@ export default function VehicleDetailPage() {
     )
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value)
-  }
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0,
+    }).format(value)
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat("es-CO").format(value)
@@ -128,7 +131,7 @@ export default function VehicleDetailPage() {
             </div>
 
             {/* Descripción */}
-            <Card className="border-0 shadow-sm rounded-3xl overflow-hidden">
+            <Card className="border-slate-200 shadow-xl shadow-slate-200/60 rounded-3xl overflow-hidden">
               <CardContent className="p-8">
                 <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
@@ -148,7 +151,7 @@ export default function VehicleDetailPage() {
           {/* Columna Derecha: Detalles y Vendedor */}
           <div className="lg:col-span-5 space-y-6">
             {/* Tarjeta Principal de Precio y Modelo */}
-            <Card className="border-0 shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden relative">
+            <Card className="border-slate-200 shadow-xl shadow-slate-200/60 rounded-3xl overflow-hidden relative">
               <div className="absolute top-0 right-0 p-6 pointer-events-none opacity-5">
                 <Car className="w-32 h-32" />
               </div>
@@ -162,9 +165,28 @@ export default function VehicleDetailPage() {
                   {vehicle.marca} <span className="font-light text-slate-500">{vehicle.modelo}</span>
                 </h1>
 
-                <p className="text-5xl font-black text-blue-600 my-6 tracking-tighter">
-                  {formatCurrency(vehicle.precio)}
-                </p>
+                <OdometerPrice value={Number(vehicle.precio || 0)} formatter={formatCurrency} />
+
+                <div className="grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/70 p-3 sm:grid-cols-3">
+                  <Button asChild className="h-12 rounded-2xl bg-blue-600 font-bold shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700">
+                    <Link href={`/vehicles/${vehicleId}/comprar`}>
+                      <ShoppingCart className="h-4 w-4" />
+                      Comprar
+                    </Link>
+                  </Button>
+                  <Button asChild variant="secondary" className="h-12 rounded-2xl bg-white font-bold text-slate-900 shadow-sm hover:-translate-y-0.5 hover:bg-slate-100">
+                    <Link href={`/vehicles/${vehicleId}/financiar`}>
+                      <Banknote className="h-4 w-4" />
+                      Financiar
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="h-12 rounded-2xl border-blue-200 bg-white font-bold text-blue-700 shadow-sm hover:-translate-y-0.5 hover:bg-blue-50">
+                    <Link href={`/vehicles/${vehicleId}/cotizar-soat`}>
+                      <ShieldCheck className="h-4 w-4" />
+                      SOAT
+                    </Link>
+                  </Button>
+                </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-100">
                   <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
@@ -186,7 +208,7 @@ export default function VehicleDetailPage() {
             </Card>
 
             {/* Tarjeta de Información del Vendedor */}
-            <Card className="border-0 shadow-sm rounded-3xl overflow-hidden">
+            <Card className="border-slate-200 shadow-xl shadow-slate-200/60 rounded-3xl overflow-hidden">
               <CardContent className="p-8">
                 <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                   <User className="w-5 h-5 text-slate-400" />
@@ -217,5 +239,34 @@ export default function VehicleDetailPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+function OdometerPrice({ value, formatter }: { value: number; formatter: (value: number) => string }) {
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    let frame = 0
+    const duration = 950
+    const start = performance.now()
+
+    const animate = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setDisplayValue(Math.round(value * eased))
+
+      if (progress < 1) {
+        frame = requestAnimationFrame(animate)
+      }
+    }
+
+    frame = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(frame)
+  }, [value])
+
+  return (
+    <p className="my-6 text-5xl font-black tracking-tighter text-blue-600 tabular-nums">
+      {formatter(displayValue)}
+    </p>
   )
 }

@@ -4,8 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Car, ArrowLeft, Loader2, Upload, X } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Car, ArrowLeft, CheckCircle2, Loader2, Upload, X } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api"
 
 export default function PublishVehiclePage() {
@@ -14,7 +14,6 @@ export default function PublishVehiclePage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-
   const [formData, setFormData] = useState({
     marca: "",
     modelo: "",
@@ -25,65 +24,48 @@ export default function PublishVehiclePage() {
     imagen: null as File | null,
   })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = event.target
     setFormData((prev) => ({
       ...prev,
       [name]: name === "año" || name === "precio" || name === "kilometraje" ? (value ? Number(value) : "") : value,
     }))
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        imagen: file,
-      }))
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
+    setFormData((prev) => ({ ...prev, imagen: file }))
+    const reader = new FileReader()
+    reader.onloadend = () => setImagePreview(reader.result as string)
+    reader.readAsDataURL(file)
   }
 
   const removeImage = () => {
-    setFormData((prev) => ({
-      ...prev,
-      imagen: null,
-    }))
+    setFormData((prev) => ({ ...prev, imagen: null }))
     setImagePreview(null)
   }
 
-  const formatPrecio = (value: number | string) => {
+  const formatNumber = (value: number | string) => {
     if (!value) return ""
-    const num = Number(value)
-    return num.toLocaleString("es-CO")
+    return Number(value).toLocaleString("es-CO")
   }
 
-  const formatKilometraje = (value: number | string) => {
-    if (!value) return ""
-    const num = Number(value)
-    return num.toLocaleString("es-CO")
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError("")
     setLoading(true)
 
     try {
       const user = localStorage.getItem("user")
       if (!user) {
-        setError("Debes estar autenticado para publicar un vehículo")
+        setError("Debes estar autenticado para publicar un vehiculo")
         router.push("/auth/login")
         return
       }
 
       const userData = JSON.parse(user)
-      const userId = userData.id
 
       if (!formData.marca || !formData.modelo || !formData.año || !formData.precio) {
         setError("Completa todos los campos obligatorios")
@@ -95,20 +77,16 @@ export default function PublishVehiclePage() {
       if (formData.imagen) {
         imagenBase64 = await new Promise<string>((resolve) => {
           const reader = new FileReader()
-          reader.onloadend = () => {
-            resolve(reader.result as string)
-          }
+          reader.onloadend = () => resolve(reader.result as string)
           reader.readAsDataURL(formData.imagen!)
         })
       }
 
       const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
+          userId: userData.id,
           marca: formData.marca,
           modelo: formData.modelo,
           año: formData.año,
@@ -119,7 +97,7 @@ export default function PublishVehiclePage() {
         }),
       })
 
-      let data;
+      let data
       const contentType = response.headers.get("content-type")
       if (contentType && contentType.includes("application/json")) {
         data = await response.json()
@@ -128,243 +106,158 @@ export default function PublishVehiclePage() {
         data = { error: text || "Error desconocido del servidor" }
       }
 
-      if (!response.ok) {
-        throw new Error(data.error || `Error HTTP ${response.status}`)
-      }
+      if (!response.ok) throw new Error(data.error || `Error HTTP ${response.status}`)
 
       setSuccess(true)
-      setTimeout(() => {
-        router.push("/protected")
-      }, 2000)
+      setTimeout(() => router.push("/protected"), 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al publicar el vehículo")
+      setError(err instanceof Error ? err.message : "Error al publicar el vehiculo")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center gap-4 px-4 py-4 lg:px-6">
-          <Link href="/protected" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="text-sm font-medium">Volver</span>
-          </Link>
-          <div className="flex items-center gap-3 ml-auto">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_48%,#f8fafc_100%)] pb-12 dark:bg-[linear-gradient(180deg,#0f172a_0%,#111827_48%,#0f172a_100%)]">
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
+        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-4 lg:px-6">
+          <Button asChild variant="ghost" className="rounded-xl text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+            <Link href="/protected">
+              <ArrowLeft className="h-4 w-4" />
+              Volver
+            </Link>
+          </Button>
+          <div className="ml-auto flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-blue-600/20">
               <Car className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-bold">Cali Motors</p>
-              <p className="text-xs text-slate-500">Publicar vehículo</p>
+              <p className="text-sm font-black text-slate-950 dark:text-white">Cali Motors</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Publicar vehiculo</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-8 lg:px-6">
-        <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-3xl">Publicar un nuevo vehículo</CardTitle>
-            <CardDescription>Completa todos los detalles de tu vehículo para publicarlo en el marketplace</CardDescription>
-          </CardHeader>
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[0.78fr_1.22fr] lg:px-6">
+        <aside className="space-y-4">
+          <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-2xl shadow-slate-300/60 dark:bg-slate-900 dark:shadow-slate-950/20">
+            <p className="mb-2 text-sm font-bold text-blue-200">Nueva publicacion</p>
+            <h1 className="text-3xl font-black tracking-tight">Muestra tu vehiculo con mejor presencia.</h1>
+            <p className="mt-3 text-sm leading-6 text-slate-300">
+              Fotos claras, precio visible y datos completos ayudan a que los compradores comparen mas rapido.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-sm font-bold text-slate-950 dark:text-slate-100">Resumen</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-400">
+              <SummaryRow label="Marca" value={formData.marca || "Pendiente"} />
+              <SummaryRow label="Modelo" value={formData.modelo || "Pendiente"} />
+              <SummaryRow label="Precio" value={formData.precio ? `$${formatNumber(formData.precio)}` : "Pendiente"} />
+            </div>
+          </div>
+        </aside>
 
-          <CardContent>
+        <Card className="rounded-[2rem] border-slate-200 bg-white shadow-2xl shadow-slate-200/70 dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/20">
+          <CardContent className="p-6 sm:p-8">
             {success ? (
-              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-6 text-center">
-                <div className="mb-3 text-4xl">✓</div>
-                <h3 className="text-lg font-bold text-emerald-900">¡Vehículo publicado exitosamente!</h3>
-                <p className="text-sm text-emerald-700 mt-1">Redirigiendo al dashboard...</p>
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center dark:border-emerald-900/60 dark:bg-emerald-950/30">
+                <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-600 dark:text-emerald-300" />
+                <h3 className="text-xl font-black text-emerald-950 dark:text-emerald-100">Vehiculo publicado exitosamente</h3>
+                <p className="mt-2 text-sm text-emerald-700 dark:text-emerald-300">Redirigiendo al tablero...</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Sección: Imagen */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-slate-900">Imagen del vehículo</h3>
+              <form onSubmit={handleSubmit} className="space-y-7">
+                <section>
+                  <h2 className="mb-4 text-xl font-black text-slate-950 dark:text-slate-100">Imagen del vehiculo</h2>
                   {imagePreview ? (
-                    <div className="relative w-full">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-80 object-cover rounded-xl border border-slate-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition"
-                      >
+                    <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800">
+                      <img src={imagePreview} alt="Vista previa" className="h-80 w-full object-cover" />
+                      <button type="button" onClick={removeImage} className="absolute right-4 top-4 rounded-full bg-red-500 p-2 text-white shadow-lg transition hover:bg-red-600">
                         <X className="h-5 w-5" />
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-100 transition">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="h-12 w-12 text-slate-400 mb-2" />
-                        <p className="text-sm text-slate-700 font-medium">Haz clic para cargar una imagen</p>
-                        <p className="text-xs text-slate-500">PNG, JPG, GIF (máx. 5MB)</p>
-                      </div>
-                      <input
-                        type="file"
-                        name="imagen"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
+                    <label className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-blue-300 hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-950/40 dark:hover:bg-slate-800">
+                      <Upload className="mb-3 h-12 w-12 text-slate-400" />
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Haz clic para cargar una imagen</p>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">PNG, JPG o WEBP</p>
+                      <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} className="hidden" />
                     </label>
                   )}
-                </div>
+                </section>
 
-                {/* Sección: Información del vehículo */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-slate-900">Información del vehículo</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Marca */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Marca <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="marca"
-                        placeholder="Ej: Toyota, Chevrolet, Mazda"
-                        value={formData.marca}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        required
-                      />
-                    </div>
-
-                    {/* Modelo */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Modelo <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="modelo"
-                        placeholder="Ej: Corolla, Spark, 3"
-                        value={formData.modelo}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        required
-                      />
-                    </div>
-
-                    {/* Año */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Año <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        name="año"
-                        min="1900"
-                        max={new Date().getFullYear()}
-                        value={formData.año}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        required
-                      />
-                    </div>
-
-                    {/* Precio */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Precio (COP) <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                        <input
-                          type="number"
-                          name="precio"
-                          placeholder="50000000"
-                          value={formData.precio}
-                          onChange={handleChange}
-                          className="w-full pl-8 pr-32 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                          required
-                        />
-                        {formData.precio && (
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-600 pointer-events-none">
-                            {formatPrecio(formData.precio)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Kilometraje */}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Kilometraje (km)
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          name="kilometraje"
-                          placeholder="120000"
-                          value={formData.kilometraje}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
-                        />
-                        {formData.kilometraje && (
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-600">
-                            {formatKilometraje(formData.kilometraje)} km
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                <section>
+                  <h2 className="mb-4 text-xl font-black text-slate-950 dark:text-slate-100">Informacion del vehiculo</h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Marca" name="marca" value={formData.marca} onChange={handleChange} placeholder="Ej: Toyota, Chevrolet, Mazda" required />
+                    <Field label="Modelo" name="modelo" value={formData.modelo} onChange={handleChange} placeholder="Ej: Corolla, Spark, 3" required />
+                    <Field label="Ano" name="año" type="number" min="1900" max={new Date().getFullYear()} value={formData.año} onChange={handleChange} required />
+                    <Field label="Precio (COP)" name="precio" type="number" value={formData.precio} onChange={handleChange} placeholder="50000000" required helper={formData.precio ? `$${formatNumber(formData.precio)}` : ""} />
+                    <Field label="Kilometraje (km)" name="kilometraje" type="number" value={formData.kilometraje} onChange={handleChange} placeholder="120000" helper={formData.kilometraje ? `${formatNumber(formData.kilometraje)} km` : ""} />
                   </div>
-                </div>
+                </section>
 
-                {/* Descripción */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Descripción
-                  </label>
+                <section>
+                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">Descripcion</label>
                   <textarea
                     name="descripcion"
-                    placeholder="Describe el estado general del vehículo, características especiales, accesorios, etc."
+                    placeholder="Describe estado general, caracteristicas, mantenimientos y accesorios."
                     value={formData.descripcion}
                     onChange={handleChange}
                     rows={5}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition resize-none"
+                    className="w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
                   />
-                </div>
+                </section>
 
-                {/* Error Message */}
-                {error && (
-                  <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-                    <p className="text-sm text-red-800">{error}</p>
-                  </div>
-                )}
+                {error && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">{error}</div>}
 
-                {/* Botones */}
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 h-12 rounded-xl"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Publicando...
-                      </>
-                    ) : (
-                      "Publicar vehículo"
-                    )}
+                <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                  <Button asChild type="button" variant="outline" className="h-12 flex-1 rounded-2xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+                    <Link href="/protected">Cancelar</Link>
                   </Button>
-                  <Link href="/protected" className="flex-1">
-                    <Button type="button" variant="outline" className="w-full h-12 rounded-xl">
-                      Cancelar
-                    </Button>
-                  </Link>
+                  <Button type="submit" disabled={loading} className="h-12 flex-1 rounded-2xl bg-blue-600 font-bold shadow-xl shadow-blue-600/20 hover:bg-blue-700">
+                    {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Publicando...</> : "Publicar vehiculo"}
+                  </Button>
                 </div>
               </form>
             )}
           </CardContent>
         </Card>
       </main>
+    </div>
+  )
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
+      <span>{label}</span>
+      <span className="font-bold text-slate-950 dark:text-slate-100">{value}</span>
+    </div>
+  )
+}
+
+function Field({
+  label,
+  helper,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & {
+  label: string
+  helper?: string
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+        {label} {props.required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <input
+          {...props}
+          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
+        />
+        {helper && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 dark:text-slate-400">{helper}</span>}
+      </div>
     </div>
   )
 }

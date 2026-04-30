@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'CaliMotors - Marketplace de Vehículos',
-  description: 'Cali Motors, Tu mercado de vehiculos de confianza. Encuentra tu próximo auto con nosotros. Explora, compara y compra con facilidad. Tu viaje comienza aquí.',
+  title: 'Cali Motors - Marketplace de Vehiculos',
+  description: 'Cali Motors, tu mercado de vehiculos de confianza. Encuentra tu proximo auto, compara opciones y compra con facilidad.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className="font-sans antialiased">
         {children}
         <Analytics />
