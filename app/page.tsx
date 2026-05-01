@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Car, ShieldCheck, Sparkles } from "lucide-react"
+import { Car, ShieldCheck, Sparkles } from "lucide-react"
 
 export default function Home() {
   return (
@@ -50,17 +50,7 @@ export default function Home() {
             Explora, compara y conecta con vendedores en un marketplace moderno para comprar o publicar vehiculos con confianza.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild className="h-12 rounded-2xl bg-blue-600 px-6 text-base font-bold shadow-xl shadow-blue-700/30 hover:-translate-y-0.5 hover:bg-blue-500">
-              <Link href="/protected">
-                Explorar vehiculos
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-12 rounded-2xl border-white/25 bg-white/10 px-6 text-base font-bold text-white backdrop-blur hover:-translate-y-0.5 hover:bg-white hover:text-slate-950">
-              <Link href="/vehicles/new">Publicar vehiculo</Link>
-            </Button>
-          </div>
+
         </section>
 
         <aside className="float-in hidden rounded-[2rem] border border-white/15 bg-white/10 p-5 shadow-2xl shadow-slate-950/40 backdrop-blur-md lg:block">

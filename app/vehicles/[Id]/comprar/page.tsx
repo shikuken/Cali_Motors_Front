@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from "react"
+import { FormEvent, useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,10 +25,11 @@ import {
 } from "../_components/vehicle-flow-shared"
 
 const initialForm = {
-  fullName: "",
+  firstName: "",
+  lastName: "",
   document: "",
   email: "",
-  phone: "",
+  phoneNum: "",
   paymentMethod: "",
   cardNumber: "",
   expiry: "",
@@ -42,6 +43,44 @@ export default function ComprarVehiclePage() {
   const [form, setForm] = useState(initialForm)
   const [formError, setFormError] = useState("")
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    const token = localStorage.getItem("token")
+    if (storedUser) {
+      try {
+        const u = JSON.parse(storedUser)
+        setForm((f) => ({
+          ...f,
+          firstName: u.firstName || u.first_name || u.name || "",
+          lastName: u.lastName || u.last_name || "",
+          email: u.email || "",
+          phoneNum: u.phone || "",
+        }))
+
+        if (u.id && token) {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${u.id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data) {
+                setForm((f) => ({
+                  ...f,
+                  firstName: data.first_name || f.firstName,
+                  lastName: data.last_name || f.lastName,
+                  email: data.email || f.email,
+                  phoneNum: data.phone || f.phoneNum,
+                }))
+              }
+            })
+            .catch(console.error)
+        }
+      } catch (e) {
+        console.error("Error parsing user data")
+      }
+    }
+  }, [])
 
   if (loading) return <LoadingState label="Preparando resumen de compra..." />
   if (error || !vehicle) return <ErrorState message={error || "No hay informacion del vehiculo"} vehicleId={vehicleId} />
@@ -107,10 +146,13 @@ export default function ComprarVehiclePage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <TextField label="Nombre completo" value={form.fullName} onChange={(value) => setForm({ ...form, fullName: value })} />
+                  <TextField label="Nombre" value={form.firstName} onChange={(value) => setForm({ ...form, firstName: value })} />
+                  <TextField label="Apellido" value={form.lastName} onChange={(value) => setForm({ ...form, lastName: value })} />
                   <TextField label="Documento" value={form.document} onChange={(value) => setForm({ ...form, document: value })} />
                   <TextField label="Correo" type="email" value={form.email} onChange={(value) => setForm({ ...form, email: value })} />
-                  <TextField label="Telefono" value={form.phone} onChange={(value) => setForm({ ...form, phone: value })} />
+                  <div className="col-span-full sm:col-span-2">
+                    <TextField label="Numero de telefono" value={form.phoneNum} onChange={(value) => setForm({ ...form, phoneNum: value })} />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -128,9 +170,9 @@ export default function ComprarVehiclePage() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-[1fr_0.7fr_0.4fr]">
-                  <TextField label="Referencia de pago" value={form.cardNumber} onChange={(value) => setForm({ ...form, cardNumber: value })} />
-                  <TextField label="Fecha preferida" placeholder="DD/MM/AAAA" value={form.expiry} onChange={(value) => setForm({ ...form, expiry: value })} />
-                  <TextField label="Codigo interno" value={form.cvv} onChange={(value) => setForm({ ...form, cvv: value })} />
+                  <TextField label="Numero de la tarjeta" value={form.cardNumber} onChange={(value) => setForm({ ...form, cardNumber: value })} />
+                  <TextField label="Fecha de expiracion de la tarjeta" placeholder="MM/AA" value={form.expiry} onChange={(value) => setForm({ ...form, expiry: value })} />
+                  <TextField label="CVV" value={form.cvv} onChange={(value) => setForm({ ...form, cvv: value })} />
                 </div>
 
                 {formError && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{formError}</p>}

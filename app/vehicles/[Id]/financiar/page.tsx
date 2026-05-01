@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useMemo, useState } from "react"
+import { FormEvent, useMemo, useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,12 +52,45 @@ export default function FinanciarVehiclePage() {
   const { loading, vehicle, error } = useVehicle(vehicleId)
   const [months, setMonths] = useState(36)
   const [downPaymentValue, setDownPaymentValue] = useState("")
-  const [fullName, setFullName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [document, setDocument] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [formError, setFormError] = useState("")
   const [success, setSuccess] = useState(false)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    const token = localStorage.getItem("token")
+    if (storedUser) {
+      try {
+        const u = JSON.parse(storedUser)
+        setFirstName(u.firstName || u.first_name || u.name || "")
+        setLastName(u.lastName || u.last_name || "")
+        setEmail(u.email || "")
+        setPhone(u.phone || "")
+
+        if (u.id && token) {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${u.id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data) {
+                setFirstName(prev => data.first_name || prev)
+                setLastName(prev => data.last_name || prev)
+                setEmail(prev => data.email || prev)
+                setPhone(prev => data.phone || prev)
+              }
+            })
+            .catch(console.error)
+        }
+      } catch (e) {
+        console.error("Error parsing user data")
+      }
+    }
+  }, [])
 
   const calculations = useMemo(() => {
     const price = Number(vehicle?.precio || 0)
@@ -94,7 +127,7 @@ export default function FinanciarVehiclePage() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!fullName.trim() || !document.trim() || !email.trim() || !phone.trim() || !downPaymentValue.trim()) {
+    if (!firstName.trim() || !lastName.trim() || !document.trim() || !email.trim() || !phone.trim() || !downPaymentValue.trim()) {
       setFormError("Completa tus datos y la cuota inicial para enviar la solicitud.")
       return
     }
@@ -194,10 +227,13 @@ export default function FinanciarVehiclePage() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <TextField label="Nombre completo" value={fullName} onChange={setFullName} />
+                  <TextField label="Nombre" value={firstName} onChange={setFirstName} />
+                  <TextField label="Apellido" value={lastName} onChange={setLastName} />
                   <TextField label="Documento" value={document} onChange={setDocument} />
                   <TextField label="Correo" type="email" value={email} onChange={setEmail} />
-                  <TextField label="Telefono" value={phone} onChange={setPhone} />
+                  <div className="col-span-full sm:col-span-2">
+                    <TextField label="Numero de telefono" value={phone} onChange={setPhone} />
+                  </div>
                 </div>
 
                 {formError && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{formError}</p>}
