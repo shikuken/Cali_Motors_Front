@@ -6,6 +6,7 @@ import type React from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { VehicleSearch, Filters } from "@/components/ui/vehicle-search"
 import { useSignOut } from "@/app/auth/actions"
 import { fetchWithAuth } from "@/lib/api"
@@ -35,7 +36,6 @@ import {
 } from "lucide-react"
 
 const fetcher = (url: string) => fetchWithAuth(url).then((res) => res.json())
-const compareStorageKey = "caliMotorsCompareVehicles"
 const nativeYearKey = "a" + String.fromCharCode(241) + "o"
 const mojibakeYearKey = "a" + String.fromCharCode(195, 177) + "o"
 
@@ -72,25 +72,7 @@ function getVehicleYear(vehicle: any) {
   return vehicle[nativeYearKey] ?? vehicle[mojibakeYearKey] ?? "N/D"
 }
 
-function normalizeVehicleForCompare(vehicle: any) {
-  return {
-    id: vehicle.id,
-    marca: vehicle.marca,
-    modelo: vehicle.modelo,
-    precio: vehicle.precio,
-    year: getVehicleYear(vehicle),
-    kilometraje: vehicle.kilometraje,
-    estado: vehicle.estado,
-    imagen: vehicle.imagen,
-    descripcion: vehicle.descripcion,
-    first_name: vehicle.first_name,
-    last_name: vehicle.last_name,
-    email: vehicle.email,
-    phone: vehicle.phone,
-  }
-}
-
-function ThemeToggle() {
+function ThemeToggleDropdownItem() {
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
@@ -100,7 +82,8 @@ function ThemeToggle() {
     setIsDark(active)
   }, [])
 
-  const toggle = () => {
+  const toggle = (e: React.MouseEvent) => {
+    e.preventDefault()
     const next = !isDark
     document.documentElement.classList.toggle("dark", next)
     localStorage.setItem("theme", next ? "dark" : "light")
@@ -108,16 +91,10 @@ function ThemeToggle() {
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-slate-200 transition hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white"
-      aria-label="Cambiar modo oscuro"
-      title="Cambiar modo oscuro"
-    >
-      <Sun className={`absolute h-4 w-4 transition-all duration-300 ${isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`} />
-      <Moon className={`absolute h-4 w-4 transition-all duration-300 ${isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
-    </button>
+    <DropdownMenuItem onClick={toggle} className="cursor-pointer dark:focus:bg-slate-800">
+      {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+      Modo {isDark ? "claro" : "oscuro"}
+    </DropdownMenuItem>
   )
 }
 
@@ -128,8 +105,6 @@ function VehicleGrid({
   isOwner,
   isAdmin,
   onDelete,
-  compareIds,
-  onToggleCompare,
 }: {
   vehicles: any[]
   loading: boolean
@@ -137,8 +112,6 @@ function VehicleGrid({
   isOwner: boolean
   isAdmin?: boolean
   onDelete?: (id: number) => Promise<void>
-  compareIds: Set<number>
-  onToggleCompare: (vehicle: any) => void
 }) {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [confirmId, setConfirmId] = useState<number | null>(null)
@@ -234,19 +207,6 @@ function VehicleGrid({
             </p>
 
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
-              <Button
-                type="button"
-                variant={compareIds.has(vehicle.id) ? "default" : "outline"}
-                className={`h-10 w-full rounded-xl font-bold ${compareIds.has(vehicle.id)
-                  ? "bg-slate-950 text-white hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700"
-                  : "dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-                  }`}
-                onClick={() => onToggleCompare(vehicle)}
-              >
-                <Scale className="h-4 w-4" />
-                {compareIds.has(vehicle.id) ? "En comparador" : "Comparar"}
-              </Button>
-
               {isOwner || isAdmin ? (
                 confirmId === vehicle.id ? (
                   <div className="flex w-full items-center justify-between rounded-2xl bg-red-50 p-2 dark:bg-red-950/30">
@@ -367,7 +327,6 @@ export function DashboardContent({ user }: { user: any }) {
   const [loadingVehicles, setLoadingVehicles] = useState(true)
   const [allVehicles, setAllVehicles] = useState<any[]>([])
   const [loadingAllVehicles, setLoadingAllVehicles] = useState(true)
-  const [compareVehicles, setCompareVehicles] = useState<any[]>([])
   const [unreadMessages, setUnreadMessages] = useState(0)
   const { isLoading } = useSWR("/api/dashboard/stats", fetcher)
   const handleSignOut = useSignOut()
@@ -399,32 +358,6 @@ export function DashboardContent({ user }: { user: any }) {
 
   const filteredUserVehicles = userVehicles.filter(filterFn)
   const filteredAllVehicles = allVehicles.filter(filterFn)
-  const compareIds = useMemo(() => new Set(compareVehicles.map((vehicle) => vehicle.id)), [compareVehicles])
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(compareStorageKey)
-      if (saved) setCompareVehicles(JSON.parse(saved))
-    } catch {
-      setCompareVehicles([])
-    }
-  }, [])
-
-  const updateCompareVehicles = (vehiclesToCompare: any[]) => {
-    setCompareVehicles(vehiclesToCompare)
-    localStorage.setItem(compareStorageKey, JSON.stringify(vehiclesToCompare))
-  }
-
-  const handleToggleCompare = (vehicle: any) => {
-    const isSelected = compareIds.has(vehicle.id)
-    if (isSelected) {
-      updateCompareVehicles(compareVehicles.filter((item) => item.id !== vehicle.id))
-      return
-    }
-
-    const nextVehicles = [...compareVehicles, normalizeVehicleForCompare(vehicle)].slice(-3)
-    updateCompareVehicles(nextVehicles)
-  }
 
   const formatVehicles = (vehicles: any[]) => {
     return vehicles.map((v: any) => ({
@@ -500,7 +433,7 @@ export function DashboardContent({ user }: { user: any }) {
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_42%,#f8fafc_100%)] text-slate-900 transition-colors duration-500 dark:bg-[linear-gradient(180deg,#0f172a_0%,#111827_46%,#0f172a_100%)] dark:text-slate-100">
       <header className="sticky top-0 z-40 border-b border-white/70 bg-slate-950/95 text-white shadow-xl shadow-slate-900/10 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 lg:w-[250px]">
             <Link href="/protected" className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/30">
                 <Car className="h-5 w-5" />
@@ -510,15 +443,9 @@ export function DashboardContent({ user }: { user: any }) {
                 <p className="text-xs text-slate-300">Compra y venta de vehiculos</p>
               </div>
             </Link>
-
-            <Link href="/profile" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm transition hover:bg-white hover:text-slate-950 dark:hover:bg-slate-800 dark:hover:text-white">
-              <User className="h-4 w-4" />
-              <span className="hidden font-semibold sm:inline">{displayName}</span>
-              {user?.rol === "admin" && <span className="rounded-full bg-blue-500 px-2 py-0.5 text-[10px] font-black text-white">Admin</span>}
-            </Link>
           </div>
 
-          <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
+          <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center lg:justify-center">
             <VehicleSearch
               allVehicles={allVehicles}
               onSearchChange={(term, newFilters) => {
@@ -526,33 +453,56 @@ export function DashboardContent({ user }: { user: any }) {
                 setFilters(newFilters)
               }}
             />
-            <Button asChild className="h-11 rounded-2xl bg-blue-600 px-5 font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-500">
+            <Button asChild className="h-11 shrink-0 rounded-2xl bg-blue-600 px-5 font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-500">
               <Link href="/vehicles/new">
                 <Plus className="h-4 w-4" />
                 Publicar vehiculo
               </Link>
             </Button>
-            <Button asChild variant="outline" className="h-11 rounded-2xl border-white/10 bg-white/10 px-5 font-bold text-white hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white">
-              <Link href="/vehicles/comparar">
-                <Scale className="h-4 w-4" />
-                Comparar {compareVehicles.length > 0 ? `(${compareVehicles.length})` : ""}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="relative h-11 rounded-2xl border-white/10 bg-white/10 px-5 font-bold text-white hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white">
-              <Link href="/chats">
-                <MessageCircle className="h-4 w-4" />
-                Chats
-                {unreadMessages > 0 && (
-                  <span className="absolute -right-1 -top-1 rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
-                    {unreadMessages}
-                  </span>
-                )}
-              </Link>
-            </Button>
-            <ThemeToggle />
-            <button type="button" onClick={handleSignOut} className="rounded-2xl p-3 text-slate-300 transition hover:bg-white/10 hover:text-white dark:hover:bg-slate-800" aria-label="Cerrar sesion" title="Cerrar sesion">
-              <LogOut className="h-4 w-4" />
-            </button>
+          </div>
+
+          <div className="flex items-center justify-end lg:w-[250px]">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button type="button" className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-slate-200 transition hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white" aria-label="Menu" title="Menu">
+                  <User className="h-5 w-5" />
+                  {unreadMessages > 0 && (
+                    <span className="absolute -right-1 -top-1 rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
+                      {unreadMessages}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 dark:bg-slate-900 dark:border-slate-800">
+                <DropdownMenuLabel className="font-bold">Mi Perfil</DropdownMenuLabel>
+                <DropdownMenuSeparator className="dark:bg-slate-800" />
+                <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">
+                  <Link href="/profile" className="flex w-full items-center">
+                    <User className="mr-2 h-4 w-4" />
+                    Editar mi perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">
+                  <Link href="/chats" className="flex w-full items-center justify-between">
+                    <div className="flex items-center">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Chats
+                    </div>
+                    {unreadMessages > 0 && (
+                      <span className="rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
+                        {unreadMessages}
+                      </span>
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <ThemeToggleDropdownItem />
+                <DropdownMenuSeparator className="dark:bg-slate-800" />
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-400">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Cerrar sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -601,8 +551,6 @@ export function DashboardContent({ user }: { user: any }) {
                 isOwner={false}
                 isAdmin={user?.rol === "admin"}
                 onDelete={handleDeleteVehicle}
-                compareIds={compareIds}
-                onToggleCompare={handleToggleCompare}
               />
             </TabsContent>
 
@@ -613,8 +561,6 @@ export function DashboardContent({ user }: { user: any }) {
                 emptyMessage={searchTerm ? "No se encontraron resultados en tus vehiculos" : "No has publicado vehiculos aun"}
                 isOwner
                 onDelete={handleDeleteVehicle}
-                compareIds={compareIds}
-                onToggleCompare={handleToggleCompare}
               />
             </TabsContent>
           </Tabs>

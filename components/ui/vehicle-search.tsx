@@ -92,14 +92,14 @@ export function VehicleSearch({ allVehicles = [], onSearchChange }: VehicleSearc
   const clearFilters = () => setFilters({ marca: "", minYear: "", maxYear: "", minPrice: "", maxPrice: "", estado: "" })
 
   return (
-    <div ref={searchRef} className="relative z-50 w-full lg:max-w-xl">
+    <div ref={searchRef} className="relative z-50 w-full lg:max-w-[515px]">
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Buscar por marca, modelo, ano..."
+            placeholder="Buscar vehiculo"
             value={searchTerm}
             onChange={(event) => {
               setSearchTerm(event.target.value)

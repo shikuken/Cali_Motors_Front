@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, ShoppingCart, Banknote, ShieldCheck, MessageCircle } from "lucide-react"
+import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, Banknote, ShieldCheck, MessageCircle } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api"
 
 export default function VehicleDetailPage() {
@@ -203,13 +203,7 @@ export default function VehicleDetailPage() {
 
                 <OdometerPrice value={Number(vehicle.precio || 0)} formatter={formatCurrency} />
 
-                <div className="grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/70 p-3 sm:grid-cols-3">
-                  <Button asChild className="h-12 rounded-2xl bg-blue-600 font-bold shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700">
-                    <Link href={`/vehicles/${vehicleId}/comprar`}>
-                      <ShoppingCart className="h-4 w-4" />
-                      Comprar
-                    </Link>
-                  </Button>
+                <div className="grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/70 p-3 sm:grid-cols-2">
                   <Button asChild variant="secondary" className="h-12 rounded-2xl bg-white font-bold text-slate-900 shadow-sm hover:-translate-y-0.5 hover:bg-slate-100">
                     <Link href={`/vehicles/${vehicleId}/financiar`}>
                       <Banknote className="h-4 w-4" />
