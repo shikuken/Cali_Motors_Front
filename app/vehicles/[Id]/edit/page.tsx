@@ -28,6 +28,9 @@ export default function EditVehiclePage() {
     descripcion: "",
     estado: "Activo",
     imagen: null as File | string | null,
+    cilindrada: "",
+    tipo_vehiculo: "",
+    tipo_transmision: "",
   })
 
   useEffect(() => {
@@ -58,7 +61,10 @@ export default function EditVehiclePage() {
           kilometraje: data.kilometraje || "",
           descripcion: data.descripcion || "",
           estado: data.estado || "Activo",
-          imagen: data.imagen || null
+          imagen: data.imagen || null,
+          cilindrada: data.cilindrada || "",
+          tipo_vehiculo: data.tipo_vehiculo || "",
+          tipo_transmision: data.tipo_transmision || "",
         })
         if (data.imagen) {
           setImagePreview(data.imagen)
@@ -79,7 +85,7 @@ export default function EditVehiclePage() {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "año" || name === "precio" || name === "kilometraje" ? (value ? Number(value) : "") : value,
+      [name]: name === "año" || name === "precio" || name === "kilometraje" || name === "cilindrada" ? (value ? Number(value) : "") : value,
     }))
   }
 
@@ -135,7 +141,7 @@ export default function EditVehiclePage() {
       const userData = JSON.parse(user)
       const userId = userData.id
 
-      if (!formData.marca || !formData.modelo || !formData.año || !formData.precio) {
+      if (!formData.marca || !formData.modelo || !formData.año || !formData.precio || !formData.cilindrada || !formData.tipo_vehiculo || !formData.tipo_transmision) {
         setError("Completa todos los campos obligatorios")
         setLoading(false)
         return
@@ -152,7 +158,7 @@ export default function EditVehiclePage() {
         })
       }
 
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/vehicles/${vehicleId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -166,6 +172,9 @@ export default function EditVehiclePage() {
           kilometraje: formData.kilometraje || 0,
           descripcion: formData.descripcion,
           estado: formData.estado,
+          cilindrada: formData.cilindrada,
+          tipo_vehiculo: formData.tipo_vehiculo,
+          tipo_transmision: formData.tipo_transmision,
           imagen: imagenBase64,
         }),
       })
@@ -374,6 +383,67 @@ export default function EditVehiclePage() {
                           </span>
                         )}
                       </div>
+                    </div>
+
+                    {/* Cilindrada */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Cilindrada (cc) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        name="cilindrada"
+                        placeholder="Ej: 1600"
+                        min="80"
+                        max="9000"
+                        value={formData.cilindrada}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:border-slate-400 focus:bg-white focus:outline-none transition"
+                        required
+                      />
+                    </div>
+
+                    {/* Tipo de vehiculo */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tipo de vehiculo <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="tipo_vehiculo"
+                        value={formData.tipo_vehiculo}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-slate-400 focus:bg-white focus:outline-none transition appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:0.65em_auto]"
+                        required
+                      >
+                        <option value="" disabled>Selecciona una opcion</option>
+                        <option value="Sedan">Sedan</option>
+                        <option value="Coupe">Coupe</option>
+                        <option value="Hatchback">Hatchback</option>
+                        <option value="Moto">Moto</option>
+                        <option value="SUV">SUV</option>
+                        <option value="Pickup">Pickup</option>
+                        <option value="Van">Van</option>
+                      </select>
+                    </div>
+
+                    {/* Transmision */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tipo de transmision <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="tipo_transmision"
+                        value={formData.tipo_transmision}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 focus:border-slate-400 focus:bg-white focus:outline-none transition appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:0.65em_auto]"
+                        required
+                      >
+                        <option value="" disabled>Selecciona una opcion</option>
+                        <option value="Manual">Manual</option>
+                        <option value="Automatica">Automatica</option>
+                        <option value="Semiautomatica">Semiautomatica</option>
+                        <option value="CVT">CVT</option>
+                      </select>
                     </div>
                   </div>
                 </div>

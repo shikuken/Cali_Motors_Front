@@ -56,6 +56,10 @@ function formatCurrency(value: number) {
 }
 
 function getDisplayName(user: any) {
+  if (user?.first_name && user?.last_name) return `${user.first_name} ${user.last_name}`
+  if (user?.firstName && user?.lastName) return `${user.firstName} ${user.lastName}`
+  if (user?.first_name) return user.first_name
+  if (user?.firstName) return user.firstName
   if (user?.name) return user.name
   if (user?.email) {
     return user.email

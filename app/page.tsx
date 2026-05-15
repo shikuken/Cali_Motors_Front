@@ -67,7 +67,7 @@ export default function Home() {
             <div className="grid gap-3">
               {[
                 ["Catalogo visual", "Fotos, precio, kilometraje y estado visibles desde el primer vistazo."],
-                ["Acciones claras", "Compra, financiacion y SOAT organizados desde el detalle."],
+                ["Acciones claras", "Financiacion y SOAT organizados desde el detalle."],
                 ["Gestion simple", "Publica, edita y administra tus vehiculos desde un solo tablero."],
               ].map(([title, copy]) => (
                 <div key={title} className="rounded-2xl bg-slate-50 p-4">

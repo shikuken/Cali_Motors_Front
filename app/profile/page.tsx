@@ -95,9 +95,11 @@ export default function ProfilePage() {
             name: `${firstName} ${lastName}`.trim(),
             email: freshData.email || userData.email || '',
             phone: freshData.phone || '',
+            documento: freshData.documento || userData.documento || '',
             rol: freshData.rol || userData.rol || '',
           }
           localStorage.setItem('user', JSON.stringify(updatedUser))
+          setUser(updatedUser)
         } else {
           const phoneData = parsePhone(userData.phone || '')
           setFormData({
@@ -170,7 +172,7 @@ export default function ProfilePage() {
           phone: fullPhone,
         }
         localStorage.setItem('user', JSON.stringify(updatedUser))
-        setTimeout(() => router.push('/protected'), 1500)
+        setUser(updatedUser)
       } else {
         const contentType = response.headers.get("content-type")
         let errorMsg = 'Error al actualizar el perfil'
@@ -200,17 +202,14 @@ export default function ProfilePage() {
     )
   }
 
-  const displayName = `${formData.firstName} ${formData.lastName}`.trim() || formData.email || "Usuario"
+  const displayName = user?.name || (user?.first_name || user?.last_name ? `${user?.first_name || ''} ${user?.last_name || ''}`.trim() : user?.email) || "Usuario"
+  const displayEmail = user?.email || ""
+  const displayPhone = user?.phone || "Sin telefono"
+  const displayDocumento = user?.documento || "Sin documento"
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_48%,#f8fafc_100%)] px-4 py-8 dark:bg-[linear-gradient(180deg,#0f172a_0%,#111827_48%,#0f172a_100%)]">
       <div className="mx-auto max-w-5xl">
-        <Button asChild variant="ghost" className="mb-6 rounded-xl text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
-          <Link href="/protected">
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Link>
-        </Button>
 
         <div className="grid gap-6 lg:grid-cols-[0.72fr_1fr]">
           <aside className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-2xl shadow-slate-300/60 dark:bg-slate-900 dark:shadow-slate-950/20">
@@ -219,14 +218,18 @@ export default function ProfilePage() {
             </div>
             <p className="text-sm font-bold text-blue-200">Mi perfil</p>
             <h1 className="mt-2 text-3xl font-black tracking-tight">{displayName}</h1>
-            <div className="mt-6 space-y-3 text-sm text-slate-300">
+            <div className="mt-6 space-y-3 text-sm text-slate-300 flex-1">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-blue-300" />
-                <span className="truncate">{formData.email}</span>
+                <span className="truncate">{displayEmail}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-blue-300" />
-                <span>{formData.phonePrefix}{formData.phoneNumber || " Sin telefono"}</span>
+                <span>{displayPhone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-blue-300">C.C.</span>
+                <span>{displayDocumento}</span>
               </div>
             </div>
           </aside>

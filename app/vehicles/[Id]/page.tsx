@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, Banknote, ShieldCheck, MessageCircle } from "lucide-react"
+import { Car, ArrowLeft, Loader2, Calendar, Gauge, User, Phone, Mail, Tag, CheckCircle2, Banknote, ShieldCheck, MessageCircle, Activity, Cog } from "lucide-react"
 import { fetchWithAuth } from "@/lib/api"
 
 export default function VehicleDetailPage() {
@@ -231,6 +231,30 @@ export default function VehicleDetailPage() {
                     </span>
                     <span className="text-xl font-bold text-slate-900">
                       {vehicle.kilometraje > 0 ? `${formatNumber(vehicle.kilometraje)} km` : '0 km'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                      <Activity className="w-4 h-4" /> Cilindrada
+                    </span>
+                    <span className="text-xl font-bold text-slate-900">
+                      {vehicle.cilindrada ? `${formatNumber(vehicle.cilindrada)} cc` : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                      <Car className="w-4 h-4" /> Tipo
+                    </span>
+                    <span className="text-xl font-bold text-slate-900">
+                      {vehicle.tipo_vehiculo || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl col-span-2">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                      <Cog className="w-4 h-4" /> Transmisión
+                    </span>
+                    <span className="text-xl font-bold text-slate-900">
+                      {vehicle.tipo_transmision || 'N/A'}
                     </span>
                   </div>
                 </div>

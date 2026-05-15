@@ -22,13 +22,16 @@ export default function PublishVehiclePage() {
     kilometraje: "",
     descripcion: "",
     imagen: null as File | null,
+    cilindrada: "",
+    tipo_vehiculo: "",
+    tipo_transmision: "",
   })
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "año" || name === "precio" || name === "kilometraje" ? (value ? Number(value) : "") : value,
+      [name]: name === "año" || name === "precio" || name === "kilometraje" || name === "cilindrada" ? (value ? Number(value) : "") : value,
     }))
   }
 
@@ -67,7 +70,7 @@ export default function PublishVehiclePage() {
 
       const userData = JSON.parse(user)
 
-      if (!formData.marca || !formData.modelo || !formData.año || !formData.precio) {
+      if (!formData.marca || !formData.modelo || !formData.año || !formData.precio || !formData.cilindrada || !formData.tipo_vehiculo || !formData.tipo_transmision) {
         setError("Completa todos los campos obligatorios")
         setLoading(false)
         return
@@ -92,6 +95,9 @@ export default function PublishVehiclePage() {
           año: formData.año,
           precio: formData.precio,
           kilometraje: formData.kilometraje || 0,
+          cilindrada: formData.cilindrada,
+          tipo_vehiculo: formData.tipo_vehiculo,
+          tipo_transmision: formData.tipo_transmision,
           descripcion: formData.descripcion,
           imagen: imagenBase64,
         }),
@@ -195,6 +201,36 @@ export default function PublishVehiclePage() {
                     <Field label="Ano" name="año" type="number" min="1900" max={new Date().getFullYear()} value={formData.año} onChange={handleChange} required />
                     <Field label="Precio (COP)" name="precio" type="number" value={formData.precio} onChange={handleChange} placeholder="50000000" required helper={formData.precio ? `$${formatNumber(formData.precio)}` : ""} />
                     <Field label="Kilometraje (km)" name="kilometraje" type="number" value={formData.kilometraje} onChange={handleChange} placeholder="120000" helper={formData.kilometraje ? `${formatNumber(formData.kilometraje)} km` : ""} />
+                    <Field label="Cilindrada (cc)" name="cilindrada" type="number" min="80" max="9000" value={formData.cilindrada} onChange={handleChange} placeholder="Ej: 1600" required />
+                    <SelectField 
+                      label="Tipo de vehiculo" 
+                      name="tipo_vehiculo" 
+                      value={formData.tipo_vehiculo} 
+                      onChange={handleChange} 
+                      required 
+                      options={[
+                        { value: 'Sedan', label: 'Sedan' },
+                        { value: 'Coupe', label: 'Coupe' },
+                        { value: 'Hatchback', label: 'Hatchback' },
+                        { value: 'Moto', label: 'Moto' },
+                        { value: 'SUV', label: 'SUV' },
+                        { value: 'Pickup', label: 'Pickup' },
+                        { value: 'Van', label: 'Van' },
+                      ]}
+                    />
+                    <SelectField 
+                      label="Tipo de transmision" 
+                      name="tipo_transmision" 
+                      value={formData.tipo_transmision} 
+                      onChange={handleChange} 
+                      required 
+                      options={[
+                        { value: 'Manual', label: 'Manual' },
+                        { value: 'Automatica', label: 'Automatica' },
+                        { value: 'Semiautomatica', label: 'Semiautomatica' },
+                        { value: 'CVT', label: 'CVT' },
+                      ]}
+                    />
                   </div>
                 </section>
 
@@ -257,6 +293,37 @@ function Field({
           className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
         />
         {helper && <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500 dark:text-slate-400">{helper}</span>}
+      </div>
+    </div>
+  )
+}
+
+function SelectField({
+  label,
+  options,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+  label: string
+  options: { value: string; label: string }[]
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+        {label} {props.required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <select
+          {...props}
+          className="w-full appearance-none rounded-2xl border border-slate-300 bg-white px-4 py-3 pr-10 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-100"
+        >
+          <option value="" disabled>Selecciona una opción</option>
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
       </div>
     </div>
   )

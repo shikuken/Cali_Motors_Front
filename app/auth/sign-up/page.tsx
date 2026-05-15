@@ -43,6 +43,7 @@ export default function Page() {
   const [repeatPassword, setRepeatPassword] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [documento, setDocumento] = useState('')
   const [phonePrefix, setPhonePrefix] = useState('+57')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -54,7 +55,7 @@ export default function Page() {
     setIsLoading(true)
     setError(null)
 
-    if (!email || !password || !repeatPassword || !firstName || !lastName || !phoneNumber) {
+    if (!email || !password || !repeatPassword || !firstName || !lastName || !phoneNumber || !documento) {
       setError('Por favor completa todos los campos')
       setIsLoading(false)
       return
@@ -83,6 +84,7 @@ export default function Page() {
           password,
           firstName,
           lastName,
+          documento,
           phone: `${phonePrefix}${phoneNumber}`,
           acceptTerms: true,
         }),
@@ -156,10 +158,6 @@ export default function Page() {
             </Button>
 
             <div className="mb-7">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
-                <UserPlus className="h-4 w-4" />
-                Nuevo usuario
-              </div>
               <h2 className="text-3xl font-black tracking-tight text-slate-950">Crear cuenta</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">Completa tus datos para acceder al marketplace.</p>
             </div>
@@ -170,7 +168,10 @@ export default function Page() {
                 <Field id="lastName" label="Apellido" value={lastName} onChange={setLastName} placeholder="Perez" />
               </div>
 
-              <Field id="email" label="Correo electronico" value={email} onChange={setEmail} type="email" placeholder="m@example.com" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field id="documento" label="Documento de identidad" value={documento} onChange={setDocumento} placeholder="1234567890" />
+                <Field id="email" label="Correo electronico" value={email} onChange={setEmail} type="email" placeholder="m@example.com" />
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phoneNumber">Numero de telefono</Label>
