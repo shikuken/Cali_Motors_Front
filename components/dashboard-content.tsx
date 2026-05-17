@@ -33,6 +33,7 @@ import {
   Trash2,
   User,
   X,
+  Banknote,
 } from "lucide-react"
 
 const fetcher = (url: string) => fetchWithAuth(url).then((res) => res.json())
@@ -484,6 +485,12 @@ export function DashboardContent({ user }: { user: any }) {
                   <Link href="/profile" className="flex w-full items-center">
                     <User className="mr-2 h-4 w-4" />
                     Editar mi perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">
+                  <Link href="/profile/mis-financiamientos" className="flex w-full items-center">
+                    <Banknote className="mr-2 h-4 w-4" />
+                    Mis financiamientos
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">

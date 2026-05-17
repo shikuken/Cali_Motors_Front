@@ -59,6 +59,7 @@ export default function FinanciarVehiclePage() {
   const [phone, setPhone] = useState("")
   const [formError, setFormError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
@@ -124,7 +125,7 @@ export default function FinanciarVehiclePage() {
         ? "La cuota inicial debe ser menor al precio del vehiculo."
         : ""
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!firstName.trim() || !lastName.trim() || !document.trim() || !email.trim() || !phone.trim() || !downPaymentValue.trim()) {
@@ -138,7 +139,34 @@ export default function FinanciarVehiclePage() {
     }
 
     setFormError("")
-    setSuccess(true)
+    setIsSubmitting(true)
+
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/financiamientos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          vehicleId: Number(vehicleId),
+          montoFinanciado: calculations.financedAmount,
+          plazoMeses: months,
+        }),
+      })
+
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.message || "Error al enviar la solicitud")
+      }
+
+      setSuccess(true)
+    } catch (error: any) {
+      setFormError(error.message || "Ocurrió un error inesperado al procesar la solicitud.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (success) {
@@ -240,11 +268,17 @@ export default function FinanciarVehiclePage() {
 
                 <Button
                   type="submit"
-                  disabled={Boolean(financingError)}
-                  className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold hover:bg-blue-700"
+                  disabled={Boolean(financingError) || isSubmitting}
+                  className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  <Send className="h-5 w-5" />
-                  Enviar solicitud
+                  {isSubmitting ? (
+                    "Enviando solicitud..."
+                  ) : (
+                    <>
+                      <Send className="h-5 w-5 mr-2" />
+                      Enviar solicitud
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>
