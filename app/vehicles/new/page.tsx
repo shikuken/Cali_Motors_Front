@@ -198,7 +198,7 @@ export default function PublishVehiclePage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <Field label="Marca" name="marca" value={formData.marca} onChange={handleChange} placeholder="Ej: Toyota, Chevrolet, Mazda" required />
                     <Field label="Modelo" name="modelo" value={formData.modelo} onChange={handleChange} placeholder="Ej: Corolla, Spark, 3" required />
-                    <Field label="Ano" name="año" type="number" min="1900" max={new Date().getFullYear()} value={formData.año} onChange={handleChange} required />
+                    <Field label="Año" name="año" type="number" min="1900" max={new Date().getFullYear()} value={formData.año} onChange={handleChange} required />
                     <Field label="Precio (COP)" name="precio" type="number" value={formData.precio} onChange={handleChange} placeholder="50000000" required helper={formData.precio ? `$${formatNumber(formData.precio)}` : ""} />
                     <Field label="Kilometraje (km)" name="kilometraje" type="number" value={formData.kilometraje} onChange={handleChange} placeholder="120000" helper={formData.kilometraje ? `${formatNumber(formData.kilometraje)} km` : ""} />
                     <Field label="Cilindrada (cc)" name="cilindrada" type="number" min="80" max="9000" value={formData.cilindrada} onChange={handleChange} placeholder="Ej: 1600" required />
