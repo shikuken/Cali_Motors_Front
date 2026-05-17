@@ -19,6 +19,18 @@ export default function VehicleDetailPage() {
   const [error, setError] = useState("")
   const [chatError, setChatError] = useState("")
   const [startingChat, setStartingChat] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser))
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -203,13 +215,15 @@ export default function VehicleDetailPage() {
 
                 <OdometerPrice value={Number(vehicle.precio || 0)} formatter={formatCurrency} />
 
-                <div className="grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/70 p-3 sm:grid-cols-2">
-                  <Button asChild variant="secondary" className="h-12 rounded-2xl bg-white font-bold text-slate-900 shadow-sm hover:-translate-y-0.5 hover:bg-slate-100">
-                    <Link href={`/vehicles/${vehicleId}/financiar`}>
-                      <Banknote className="h-4 w-4" />
-                      Financiar
-                    </Link>
-                  </Button>
+                <div className={`grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/70 p-3 ${currentUser?.id === vehicle.user_id ? 'sm:grid-cols-1' : 'sm:grid-cols-2'}`}>
+                  {currentUser?.id !== vehicle.user_id && (
+                    <Button asChild variant="secondary" className="h-12 rounded-2xl bg-white font-bold text-slate-900 shadow-sm hover:-translate-y-0.5 hover:bg-slate-100">
+                      <Link href={`/vehicles/${vehicleId}/financiar`}>
+                        <Banknote className="h-4 w-4" />
+                        Financiar
+                      </Link>
+                    </Button>
+                  )}
                   <Button asChild variant="outline" className="h-12 rounded-2xl border-blue-200 bg-white font-bold text-blue-700 shadow-sm hover:-translate-y-0.5 hover:bg-blue-50">
                     <Link href={`/vehicles/${vehicleId}/cotizar-soat`}>
                       <ShieldCheck className="h-4 w-4" />
