@@ -106,7 +106,7 @@ function VehicleGrid({
     return (
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {[1, 2, 3].map((item) => (
-          <div key={item} className="h-[430px] animate-pulse rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900" />
+          <div key={item} className="h-[430px] animate-pulse rounded-3xl border border-slate-800 bg-slate-900 shadow-xl shadow-slate-950/40" />
         ))}
       </div>
     )
@@ -114,7 +114,7 @@ function VehicleGrid({
 
   if (vehicles.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white px-6 py-14 text-center shadow-xl shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/20">
+      <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-800 bg-slate-900 px-6 py-14 text-center shadow-xl shadow-slate-950/40">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 text-slate-400 dark:bg-slate-800">
           <Search className="h-8 w-8" />
         </div>
@@ -129,7 +129,7 @@ function VehicleGrid({
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {vehicles.map((vehicle) => (
-        <Card key={vehicle.id} className="group flex min-h-[456px] overflow-hidden rounded-3xl border-slate-200 bg-white shadow-xl shadow-slate-200/60 premium-card-hover dark:border-slate-800 dark:bg-slate-900 dark:shadow-slate-950/20">
+        <Card key={vehicle.id} className="group flex min-h-[456px] overflow-hidden rounded-3xl border-slate-800 bg-slate-900 shadow-xl shadow-slate-950/40 premium-card-hover">
           <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
             {vehicle.imagen ? (
               <img
@@ -187,23 +187,23 @@ function VehicleGrid({
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
               {isOwner || isAdmin ? (
                 confirmId === vehicle.id ? (
-                  <div className="flex w-full items-center justify-between rounded-2xl bg-red-50 p-2 dark:bg-red-950/30">
-                    <span className="text-xs font-semibold text-red-700 dark:text-red-300">Eliminar publicacion?</span>
+                  <div className="flex w-full items-center justify-between rounded-2xl bg-red-950/30 p-2 border border-red-900/50">
+                    <span className="text-xs font-semibold text-red-300">Eliminar publicacion?</span>
                     <div className="flex gap-1">
                       <Button variant="destructive" className="h-8 rounded-xl px-3 text-xs" onClick={() => handleConfirmDelete(vehicle.id)} disabled={deletingId === vehicle.id}>
                         Si
                       </Button>
-                      <Button variant="outline" className="h-8 rounded-xl px-3 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100" onClick={() => setConfirmId(null)}>
+                      <Button variant="outline" className="h-8 rounded-xl px-3 text-xs border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700" onClick={() => setConfirmId(null)}>
                         No
                       </Button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <Button variant="outline" className="h-10 rounded-xl border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/60 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/30" onClick={() => setConfirmId(vehicle.id)} disabled={deletingId === vehicle.id}>
+                    <Button variant="outline" className="h-10 rounded-xl border-red-900/60 bg-slate-900 text-red-300 hover:bg-red-950/30" onClick={() => setConfirmId(vehicle.id)} disabled={deletingId === vehicle.id}>
                       {deletingId === vehicle.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                     </Button>
-                    <Button asChild variant="outline" className="h-10 flex-1 rounded-xl dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800">
+                    <Button asChild variant="outline" className="h-10 flex-1 rounded-xl border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800">
                       <Link href={`/vehicles/${vehicle.id}/edit`}>
                         <Pencil className="h-4 w-4" />
                         Editar
@@ -256,18 +256,18 @@ function FeaturedVehiclePopup({ vehicles }: { vehicles: any[] }) {
 
   return (
     <div className="fixed bottom-5 right-5 z-50 w-[calc(100vw-2.5rem)] max-w-sm float-in">
-      <div className="overflow-hidden rounded-3xl border border-white/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between border-b border-slate-100 p-4 dark:border-slate-800">
+      <div className="overflow-hidden rounded-3xl border border-slate-700/60 bg-slate-900 shadow-2xl shadow-slate-950/60">
+        <div className="flex items-center justify-between border-b border-slate-800 p-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-blue-600" />
-            <p className="text-sm font-black text-slate-950 dark:text-slate-100">Vehiculo destacado</p>
+            <p className="text-sm font-black text-slate-100">Vehiculo destacado</p>
           </div>
-          <button onClick={dismiss} className="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Cerrar">
+          <button onClick={dismiss} className="rounded-full p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-100" aria-label="Cerrar">
             <X className="h-4 w-4" />
           </button>
         </div>
         <div className="flex gap-4 p-4">
-          <div className="h-20 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
+          <div className="h-20 w-24 shrink-0 overflow-hidden rounded-2xl bg-slate-800">
             {featured.imagen ? (
               <img src={featured.imagen} alt={`${featured.marca} ${featured.modelo}`} className="h-full w-full object-cover" />
             ) : (
@@ -277,7 +277,7 @@ function FeaturedVehiclePopup({ vehicles }: { vehicles: any[] }) {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-black text-slate-950 dark:text-slate-100">{featured.marca} {featured.modelo}</p>
+            <p className="truncate font-black text-slate-100">{featured.marca} {featured.modelo}</p>
             <p className="mt-1 text-sm font-bold text-blue-600 dark:text-blue-300">{formatCurrency(Number(featured.precio || 0))}</p>
             <Button asChild size="sm" className="mt-3 h-8 rounded-xl bg-slate-950 text-xs hover:bg-blue-700 dark:bg-blue-600">
               <Link href={`/vehicles/${featured.id}`}>Ver ahora</Link>
@@ -408,8 +408,8 @@ export function DashboardContent({ user }: { user: any }) {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef2ff_42%,#f8fafc_100%)] text-slate-900 transition-colors duration-500 dark:bg-[linear-gradient(180deg,#0f172a_0%,#111827_46%,#0f172a_100%)] dark:text-slate-100">
-      <header className="sticky top-0 z-40 border-b border-white/70 bg-slate-950/95 text-white shadow-xl shadow-slate-900/10 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#0f172a_0%,#111827_46%,#0f172a_100%)] text-slate-100 transition-colors duration-500">
+      <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 text-white shadow-xl shadow-slate-950/30 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
           <div className="flex items-center gap-4 lg:w-[250px]">
             <Link href="/protected" className="flex items-center gap-3">
@@ -442,7 +442,7 @@ export function DashboardContent({ user }: { user: any }) {
           <div className="flex items-center justify-end lg:w-[250px]">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button type="button" className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-slate-200 transition hover:bg-white hover:text-slate-950 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white" aria-label="Menu" title="Menu">
+                <button type="button" className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 hover:text-white" aria-label="Menu" title="Menu">
                   <User className="h-5 w-5" />
                   {unreadMessages > 0 && (
                     <span className="absolute -right-1 -top-1 rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
@@ -451,22 +451,22 @@ export function DashboardContent({ user }: { user: any }) {
                   )}
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 dark:bg-slate-900 dark:border-slate-800">
+              <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800">
                 <DropdownMenuLabel className="font-bold">Mi Perfil</DropdownMenuLabel>
-                <DropdownMenuSeparator className="dark:bg-slate-800" />
-                <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">
+                <DropdownMenuSeparator className="bg-slate-800" />
+                <DropdownMenuItem asChild className="cursor-pointer focus:bg-slate-800 text-slate-300 focus:text-slate-100">
                   <Link href="/profile" className="flex w-full items-center">
                     <User className="mr-2 h-4 w-4" />
                     Editar mi perfil
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">
+                <DropdownMenuItem asChild className="cursor-pointer focus:bg-slate-800 text-slate-300 focus:text-slate-100">
                   <Link href="/profile/mis-financiamientos" className="flex w-full items-center">
                     <Banknote className="mr-2 h-4 w-4" />
                     Mis financiamientos
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="cursor-pointer dark:focus:bg-slate-800">
+                <DropdownMenuItem asChild className="cursor-pointer focus:bg-slate-800 text-slate-300 focus:text-slate-100">
                   <Link href="/chats" className="flex w-full items-center justify-between">
                     <div className="flex items-center">
                       <MessageCircle className="mr-2 h-4 w-4" />
@@ -479,8 +479,8 @@ export function DashboardContent({ user }: { user: any }) {
                     )}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="dark:bg-slate-800" />
-                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-400">
+                <DropdownMenuSeparator className="bg-slate-800" />
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-400 focus:text-red-300 focus:bg-red-950/30">
                   <LogOut className="mr-2 h-4 w-4" />
                   Cerrar sesión
                 </DropdownMenuItem>
@@ -491,7 +491,7 @@ export function DashboardContent({ user }: { user: any }) {
       </header>
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
-        <section className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-2xl shadow-slate-300/60 dark:bg-slate-900 dark:shadow-slate-950/20">
+        <section className="rounded-[2rem] bg-slate-900 p-6 text-white shadow-2xl shadow-slate-950/50 border border-slate-800">
           <div className="grid gap-6 lg:grid-cols-[1fr_0.75fr] lg:items-center">
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold text-blue-100">
@@ -513,11 +513,11 @@ export function DashboardContent({ user }: { user: any }) {
         <section className="mt-6">
           <Tabs defaultValue="explore" className="w-full">
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList className="h-12 rounded-2xl bg-white p-1 shadow-lg shadow-slate-200/70 dark:bg-slate-900 dark:shadow-slate-950/20">
-                <TabsTrigger value="explore" className="rounded-xl px-5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-100 data-[state=active]:bg-slate-950 data-[state=active]:text-white data-[state=active]:shadow-lg dark:text-slate-300 dark:hover:bg-slate-800 dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white">
+              <TabsList className="h-12 rounded-2xl bg-slate-900 p-1 shadow-lg shadow-slate-950/40 border border-slate-800">
+                <TabsTrigger value="explore" className="rounded-xl px-5 text-slate-400 transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
                   Explorar todos
                 </TabsTrigger>
-                <TabsTrigger value="my-vehicles" className="rounded-xl px-5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-100 data-[state=active]:bg-slate-950 data-[state=active]:text-white data-[state=active]:shadow-lg dark:text-slate-300 dark:hover:bg-slate-800 dark:data-[state=active]:bg-blue-600 dark:data-[state=active]:text-white">
+                <TabsTrigger value="my-vehicles" className="rounded-xl px-5 text-slate-400 transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg">
                   Mis publicaciones
                 </TabsTrigger>
               </TabsList>

@@ -187,39 +187,39 @@ export default function FinanciarVehiclePage() {
         <VehicleSummaryCard vehicle={vehicle} />
 
         <div className="space-y-6">
-          <Card className="rounded-3xl border-slate-200 shadow-xl shadow-slate-200/60">
+          <Card className="rounded-3xl border-slate-800 bg-slate-900 shadow-xl shadow-[0_24px_48px_-8px_rgba(0,0,0,0.7)]">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                <Calculator className="h-6 w-6 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-2xl text-slate-100">
+                <Calculator className="h-6 w-6 text-blue-400" />
                 Calculadora de financiacion
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-medium text-blue-800">
+              <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4 text-sm font-medium text-blue-300">
                 La cuota inicial minima es el 15% del valor del vehiculo: {formatCurrency(calculations.minDownPayment)}.
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Cuota inicial</Label>
+                  <Label className="text-slate-300">Cuota inicial</Label>
                   <Input
                     type="number"
                     min="0"
                     value={downPaymentValue}
                     onChange={(event) => setDownPaymentValue(event.target.value)}
-                    className="h-11 rounded-xl bg-white"
+                    className="h-11 rounded-xl bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500"
                     placeholder={Math.round(calculations.minDownPayment).toString()}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Plazo</Label>
+                  <Label className="text-slate-300">Plazo</Label>
                   <Select value={String(months)} onValueChange={(value) => setMonths(Number(value))}>
-                    <SelectTrigger className="h-11 w-full rounded-xl">
+                    <SelectTrigger className="h-11 w-full rounded-xl bg-slate-800 border-slate-700 text-slate-100">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-slate-900 border-slate-700">
                       {[12, 24, 36, 48, 64].map((option) => (
-                        <SelectItem key={option} value={String(option)}>
+                        <SelectItem key={option} value={String(option)} className="text-slate-200 focus:bg-slate-800 focus:text-slate-100">
                           {option} meses
                         </SelectItem>
                       ))}
@@ -229,7 +229,7 @@ export default function FinanciarVehiclePage() {
               </div>
 
               {financingError && downPaymentValue && (
-                <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{financingError}</p>
+                <p className="rounded-xl bg-red-950/30 border border-red-800 px-4 py-3 text-sm font-medium text-red-300">{financingError}</p>
               )}
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -245,10 +245,10 @@ export default function FinanciarVehiclePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-slate-200 shadow-xl shadow-slate-200/60">
+          <Card className="rounded-3xl border-slate-800 bg-slate-900 shadow-xl shadow-[0_24px_48px_-8px_rgba(0,0,0,0.7)]">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                <BadgePercent className="h-6 w-6 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-2xl text-slate-100">
+                <BadgePercent className="h-6 w-6 text-blue-400" />
                 Datos del solicitante
               </CardTitle>
             </CardHeader>
@@ -264,7 +264,7 @@ export default function FinanciarVehiclePage() {
                   </div>
                 </div>
 
-                {formError && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{formError}</p>}
+                {formError && <p className="rounded-xl bg-red-950/30 border border-red-800 px-4 py-3 text-sm font-medium text-red-300">{formError}</p>}
 
                 <Button
                   type="submit"
@@ -302,17 +302,17 @@ function TextField({
 }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
-      <Input type={type} value={value} onChange={(event) => onChange(event.target.value)} className="h-11 rounded-xl bg-white" />
+      <Label className="text-slate-300">{label}</Label>
+      <Input type={type} value={value} onChange={(event) => onChange(event.target.value)} className="h-11 rounded-xl bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500" />
     </div>
   )
 }
 
 function Metric({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-4">
-      <p className="mb-1 text-xs font-medium text-slate-500">{label}</p>
-      <p className={highlight ? "text-xl font-black text-blue-600" : "font-bold text-slate-950"}>{value}</p>
+    <div className="rounded-2xl bg-slate-800 p-4">
+      <p className="mb-1 text-xs font-medium text-slate-400">{label}</p>
+      <p className={highlight ? "text-xl font-black text-blue-400" : "font-bold text-slate-100"}>{value}</p>
     </div>
   )
 }

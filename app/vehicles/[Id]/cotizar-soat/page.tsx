@@ -38,17 +38,17 @@ export default function CotizarSoatVehiclePage() {
         <VehicleSummaryCard vehicle={vehicle} />
 
         <div className="space-y-6">
-          <Card className="overflow-hidden rounded-3xl border-slate-200 shadow-xl shadow-slate-200/60">
-            <CardHeader className="bg-slate-950 text-white">
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <ShieldCheck className="h-6 w-6 text-blue-300" />
+          <Card className="overflow-hidden rounded-3xl border-slate-800 bg-slate-900 shadow-xl shadow-[0_24px_48px_-8px_rgba(0,0,0,0.7)]">
+            <CardHeader className="bg-slate-950 border-b border-slate-800">
+              <CardTitle className="flex items-center gap-2 text-2xl text-slate-100">
+                <ShieldCheck className="h-6 w-6 text-blue-400" />
                 Resultado de SOAT estimado
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-6">
-              <div className="rounded-3xl bg-blue-50 p-6 text-center">
-                <p className="mb-2 text-sm font-bold uppercase tracking-wide text-blue-700">SOAT estimado</p>
-                <p className="text-4xl font-black tracking-tight text-blue-700">{formatCurrency(soatEstimated)}</p>
+              <div className="rounded-3xl bg-blue-500/10 border border-blue-500/20 p-6 text-center">
+                <p className="mb-2 text-sm font-bold uppercase tracking-wide text-blue-400">SOAT estimado</p>
+                <p className="text-4xl font-black tracking-tight text-blue-300">{formatCurrency(soatEstimated)}</p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -58,9 +58,9 @@ export default function CotizarSoatVehiclePage() {
                 <Metric label="Tipo de calculo" value="Referencial" />
               </div>
 
-              <Separator />
+              <Separator className="bg-slate-800" />
 
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <div className="rounded-2xl border border-amber-800 bg-amber-950/30 p-4 text-sm text-amber-300">
                 <div className="mb-2 flex items-center gap-2 font-bold">
                   <AlertTriangle className="h-4 w-4" />
                   Aviso importante
@@ -70,10 +70,10 @@ export default function CotizarSoatVehiclePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-slate-200 shadow-xl shadow-slate-200/60">
+          <Card className="rounded-3xl border-slate-800 bg-slate-900 shadow-xl shadow-[0_24px_48px_-8px_rgba(0,0,0,0.7)]">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                <Calculator className="h-6 w-6 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-2xl text-slate-100">
+                <Calculator className="h-6 w-6 text-blue-400" />
                 Informacion basica
               </CardTitle>
             </CardHeader>
@@ -92,9 +92,9 @@ export default function CotizarSoatVehiclePage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-50 p-4">
-      <p className="mb-1 text-xs font-medium text-slate-500">{label}</p>
-      <p className="font-bold text-slate-950">{value}</p>
+    <div className="rounded-2xl bg-slate-800 p-4">
+      <p className="mb-1 text-xs font-medium text-slate-400">{label}</p>
+      <p className="font-bold text-slate-100">{value}</p>
     </div>
   )
 }

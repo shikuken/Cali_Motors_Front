@@ -53,14 +53,14 @@ export default function Home() {
 
         </section>
 
-        <aside className="float-in hidden rounded-[2rem] border border-white/15 bg-white/10 p-5 shadow-2xl shadow-slate-950/40 backdrop-blur-md lg:block">
-          <div className="rounded-[1.5rem] bg-white p-5 text-slate-950">
+        <aside className="float-in hidden rounded-[2rem] border border-slate-700/40 bg-slate-900/60 p-5 shadow-2xl shadow-slate-950/60 backdrop-blur-md lg:block">
+          <div className="rounded-[1.5rem] bg-slate-900 p-5 border border-slate-800">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-bold text-slate-500">Experiencia Cali Motors</p>
-                <p className="text-2xl font-black">Compra con criterio</p>
+                <p className="text-sm font-bold text-slate-400">Experiencia Cali Motors</p>
+                <p className="text-2xl font-black text-slate-100">Compra con criterio</p>
               </div>
-              <div className="rounded-2xl bg-blue-50 p-3 text-blue-600">
+              <div className="rounded-2xl bg-blue-500/15 p-3 text-blue-400">
                 <ShieldCheck className="h-6 w-6" />
               </div>
             </div>
@@ -70,9 +70,9 @@ export default function Home() {
                 ["Acciones claras", "Financiacion y SOAT organizados desde el detalle."],
                 ["Gestion simple", "Publica, edita y administra tus vehiculos desde un solo tablero."],
               ].map(([title, copy]) => (
-                <div key={title} className="rounded-2xl bg-slate-50 p-4">
-                  <p className="font-bold text-slate-950">{title}</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">{copy}</p>
+                <div key={title} className="rounded-2xl bg-slate-800 p-4 border border-slate-700/50">
+                  <p className="font-bold text-slate-100">{title}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-400">{copy}</p>
                 </div>
               ))}
             </div>

@@ -55,21 +55,21 @@ export default function VehicleDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-slate-500 mb-4" />
-        <p className="text-slate-600 font-medium animate-pulse">Cargando detalles del vehículo...</p>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-400 mb-4" />
+        <p className="text-slate-400 font-medium animate-pulse">Cargando detalles del vehículo...</p>
       </div>
     )
   }
 
   if (error || !vehicle) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
-          <Car className="h-10 w-10 text-red-500" />
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-red-950/40 rounded-full flex items-center justify-center mb-6">
+          <Car className="h-10 w-10 text-red-400" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Ups, algo salió mal</h2>
-        <p className="text-slate-600 mb-8 max-w-md">{error || "No se pudo cargar la información del vehículo"}</p>
+        <h2 className="text-2xl font-bold text-slate-100 mb-2">Ups, algo salió mal</h2>
+        <p className="text-slate-400 mb-8 max-w-md">{error || "No se pudo cargar la información del vehículo"}</p>
         <Button onClick={() => router.push("/protected")} className="rounded-xl px-8">
           Volver al catálogo
         </Button>
@@ -127,22 +127,22 @@ export default function VehicleDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-16">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+    <div className="min-h-screen bg-slate-950 font-sans pb-16">
+      <header className="sticky top-0 z-10 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-4 lg:px-8">
-          <Link href="/protected" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
-            <div className="p-2 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
+          <Link href="/protected" className="flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors">
+            <div className="p-2 bg-slate-800 rounded-full hover:bg-slate-700 transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </div>
             <span className="font-medium hidden sm:inline">Volver a Explorar</span>
           </Link>
           <div className="flex items-center gap-3 ml-auto">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/30">
               <Car className="h-5 w-5" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-bold text-slate-900">Cali Motors</p>
-              <p className="text-xs text-slate-500">Detalles del vehículo</p>
+              <p className="text-sm font-bold text-slate-100">Cali Motors</p>
+              <p className="text-xs text-slate-400">Detalles del vehículo</p>
             </div>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function VehicleDetailPage() {
       <main className="mx-auto max-w-7xl px-4 pt-8 lg:px-8">
         {/* Banner de estado si no está activo */}
         {vehicle.estado !== "Activo" && (
-          <div className={`mb-6 rounded-2xl p-4 flex items-center justify-center gap-2 border shadow-sm ${vehicle.estado === "Vendido" ? "bg-slate-100 border-slate-300 text-slate-700" : "bg-amber-50 border-amber-200 text-amber-800"
+          <div className={`mb-6 rounded-2xl p-4 flex items-center justify-center gap-2 border shadow-sm ${vehicle.estado === "Vendido" ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-amber-950/30 border-amber-800 text-amber-300"
             }`}>
             <Tag className="h-5 w-5" />
             <span className="font-semibold text-lg">
@@ -163,7 +163,7 @@ export default function VehicleDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Columna Izquierda: Imagen del vehículo */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="rounded-3xl overflow-hidden bg-white shadow-sm border border-slate-200 relative aspect-[4/3] group">
+            <div className="rounded-3xl overflow-hidden bg-slate-900 shadow-sm border border-slate-800 relative aspect-[4/3] group">
               {vehicle.imagen ? (
                 <img
                   src={vehicle.imagen}
@@ -171,25 +171,25 @@ export default function VehicleDetailPage() {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex flex-col items-center justify-center">
-                  <Car className="h-24 w-24 text-slate-400 mb-4" />
-                  <p className="text-slate-500 font-medium">Sin imagen disponible</p>
+                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center">
+                  <Car className="h-24 w-24 text-slate-600 mb-4" />
+                  <p className="text-slate-400 font-medium">Sin imagen disponible</p>
                 </div>
               )}
             </div>
 
             {/* Descripción */}
-            <Card className="border-slate-200 shadow-xl shadow-slate-200/60 rounded-3xl overflow-hidden">
+            <Card className="border-slate-800 shadow-xl shadow-slate-950/40 rounded-3xl overflow-hidden bg-slate-900">
               <CardContent className="p-8">
-                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
+                <h3 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
                   Descripción del Vehículo
                 </h3>
-                <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                <div className="prose prose-invert max-w-none text-slate-400 leading-relaxed">
                   {vehicle.descripcion ? (
                     <p className="whitespace-pre-wrap">{vehicle.descripcion}</p>
                   ) : (
-                    <p className="italic text-slate-400">El vendedor no proporcionó una descripción para este vehículo.</p>
+                    <p className="italic text-slate-500">El vendedor no proporcionó una descripción para este vehículo.</p>
                   )}
                 </div>
               </CardContent>
@@ -199,32 +199,32 @@ export default function VehicleDetailPage() {
           {/* Columna Derecha: Detalles y Vendedor */}
           <div className="lg:col-span-5 space-y-6">
             {/* Tarjeta Principal de Precio y Modelo */}
-            <Card className="border-slate-200 shadow-xl shadow-slate-200/60 rounded-3xl overflow-hidden relative">
+            <Card className="border-slate-800 shadow-xl shadow-slate-950/40 rounded-3xl overflow-hidden relative bg-slate-900">
               <div className="absolute top-0 right-0 p-6 pointer-events-none opacity-5">
-                <Car className="w-32 h-32" />
+                <Car className="w-32 h-32 text-white" />
               </div>
               <CardContent className="p-8">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 font-medium text-xs mb-4">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/15 text-blue-300 font-medium text-xs mb-4">
                   <CheckCircle2 className="w-4 h-4" />
                   Vehículo Verificado
                 </div>
 
-                <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
-                  {vehicle.marca} <span className="font-light text-slate-500">{vehicle.modelo}</span>
+                <h1 className="text-4xl font-extrabold text-slate-100 mb-2 tracking-tight">
+                  {vehicle.marca} <span className="font-light text-slate-400">{vehicle.modelo}</span>
                 </h1>
 
                 <OdometerPrice value={Number(vehicle.precio || 0)} formatter={formatCurrency} />
 
-                <div className={`grid gap-3 rounded-3xl border border-blue-100 bg-blue-50/70 p-3 ${currentUser?.id === vehicle.user_id ? 'sm:grid-cols-1' : 'sm:grid-cols-2'}`}>
+                <div className={`grid gap-3 rounded-3xl border border-slate-700 bg-slate-800/60 p-3 ${currentUser?.id === vehicle.user_id ? 'sm:grid-cols-1' : 'sm:grid-cols-2'}`}>
                   {currentUser?.id !== vehicle.user_id && (
-                    <Button asChild variant="secondary" className="h-12 rounded-2xl bg-white font-bold text-slate-900 shadow-sm hover:-translate-y-0.5 hover:bg-slate-100">
+                    <Button asChild variant="secondary" className="h-12 rounded-2xl bg-slate-700 font-bold text-slate-100 shadow-sm hover:-translate-y-0.5 hover:bg-slate-600">
                       <Link href={`/vehicles/${vehicleId}/financiar`}>
                         <Banknote className="h-4 w-4" />
                         Financiar
                       </Link>
                     </Button>
                   )}
-                  <Button asChild variant="outline" className="h-12 rounded-2xl border-blue-200 bg-white font-bold text-blue-700 shadow-sm hover:-translate-y-0.5 hover:bg-blue-50">
+                  <Button asChild variant="outline" className="h-12 rounded-2xl border-slate-600 bg-slate-700 font-bold text-blue-400 shadow-sm hover:-translate-y-0.5 hover:bg-slate-600">
                     <Link href={`/vehicles/${vehicleId}/cotizar-soat`}>
                       <ShieldCheck className="h-4 w-4" />
                       SOAT
@@ -232,42 +232,42 @@ export default function VehicleDetailPage() {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-100">
-                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-slate-800">
+                  <div className="flex flex-col p-4 bg-slate-800 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-400 mb-1">
                       <Calendar className="w-4 h-4" /> Año
                     </span>
-                    <span className="text-xl font-bold text-slate-900">{vehicle.año}</span>
+                    <span className="text-xl font-bold text-slate-100">{vehicle.año}</span>
                   </div>
-                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                  <div className="flex flex-col p-4 bg-slate-800 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-400 mb-1">
                       <Gauge className="w-4 h-4" /> Kilometraje
                     </span>
-                    <span className="text-xl font-bold text-slate-900">
+                    <span className="text-xl font-bold text-slate-100">
                       {vehicle.kilometraje > 0 ? `${formatNumber(vehicle.kilometraje)} km` : '0 km'}
                     </span>
                   </div>
-                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                  <div className="flex flex-col p-4 bg-slate-800 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-400 mb-1">
                       <Activity className="w-4 h-4" /> Cilindrada
                     </span>
-                    <span className="text-xl font-bold text-slate-900">
+                    <span className="text-xl font-bold text-slate-100">
                       {vehicle.cilindrada ? `${formatNumber(vehicle.cilindrada)} cc` : 'N/A'}
                     </span>
                   </div>
-                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl">
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                  <div className="flex flex-col p-4 bg-slate-800 rounded-2xl">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-400 mb-1">
                       <Car className="w-4 h-4" /> Tipo
                     </span>
-                    <span className="text-xl font-bold text-slate-900">
+                    <span className="text-xl font-bold text-slate-100">
                       {vehicle.tipo_vehiculo || 'N/A'}
                     </span>
                   </div>
-                  <div className="flex flex-col p-4 bg-slate-50 rounded-2xl col-span-2">
-                    <span className="flex items-center gap-1.5 text-sm text-slate-500 mb-1">
+                  <div className="flex flex-col p-4 bg-slate-800 rounded-2xl col-span-2">
+                    <span className="flex items-center gap-1.5 text-sm text-slate-400 mb-1">
                       <Cog className="w-4 h-4" /> Transmisión
                     </span>
-                    <span className="text-xl font-bold text-slate-900">
+                    <span className="text-xl font-bold text-slate-100">
                       {vehicle.tipo_transmision || 'N/A'}
                     </span>
                   </div>
@@ -276,25 +276,25 @@ export default function VehicleDetailPage() {
             </Card>
 
             {/* Tarjeta de Información del Vendedor */}
-            <Card className="border-slate-200 shadow-xl shadow-slate-200/60 rounded-3xl overflow-hidden">
+            <Card className="border-slate-800 shadow-xl shadow-slate-950/40 rounded-3xl overflow-hidden bg-slate-900">
               <CardContent className="p-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                  <User className="w-5 h-5 text-slate-400" />
+                <h3 className="text-lg font-bold text-slate-100 mb-6 flex items-center gap-2">
+                  <User className="w-5 h-5 text-slate-500" />
                   Información del Vendedor
                 </h3>
 
                 <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-md">
+                  <div className="h-16 w-16 bg-gradient-to-br from-slate-700 to-slate-800 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-md border border-slate-700">
                     {vehicle.first_name ? vehicle.first_name.charAt(0) : 'V'}
                   </div>
                   <div className="min-w-0 overflow-hidden">
-                    <p className="text-xl font-bold text-slate-900 truncate">{sellerName}</p>
-                    <a href={`mailto:${vehicle.email}`} className="text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1.5 mt-1.5 text-sm truncate">
+                    <p className="text-xl font-bold text-slate-100 truncate">{sellerName}</p>
+                    <a href={`mailto:${vehicle.email}`} className="text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-1.5 mt-1.5 text-sm truncate">
                       <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                       <span className="truncate">{vehicle.email}</span>
                     </a>
                     {vehicle.phone && (
-                      <p className="text-slate-600 flex items-center gap-1.5 mt-1.5 text-sm truncate">
+                      <p className="text-slate-400 flex items-center gap-1.5 mt-1.5 text-sm truncate">
                         <Phone className="w-3.5 h-3.5 flex-shrink-0" />
                         <span className="truncate">{vehicle.phone}</span>
                       </p>
@@ -303,7 +303,7 @@ export default function VehicleDetailPage() {
                 </div>
 
                 {chatError && (
-                  <p className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                  <p className="mt-5 rounded-2xl border border-rose-800 bg-rose-950/30 px-4 py-3 text-sm font-semibold text-rose-300">
                     {chatError}
                   </p>
                 )}
@@ -312,7 +312,7 @@ export default function VehicleDetailPage() {
                   type="button"
                   onClick={handleStartChat}
                   disabled={startingChat}
-                  className="mt-6 h-12 w-full rounded-2xl bg-slate-950 font-bold text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-blue-700"
+                  className="mt-6 h-12 w-full rounded-2xl bg-blue-600 font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-500"
                 >
                   {startingChat ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
                   Enviar mensaje
