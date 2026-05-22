@@ -37,7 +37,6 @@ const COUNTRY_PREFIXES = [
   { code: '+61', flag: 'AU', name: 'Australia' },
 ]
 
-// ─── Función para calcular la fuerza de la contraseña ───────────────────────
 function getPasswordStrength(password: string): { score: number; label: string; color: string } {
   if (!password) return { score: 0, label: '', color: '' }
   let score = 0
@@ -45,7 +44,7 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   if (password.length >= 12) score++
   if (/[A-Z]/.test(password)) score++
   if (/\d/.test(password)) score++
-  if (/[^A-Za-z0-9]/.test(password)) score++   // ← carácter especial ya sumaba punto
+  if (/[^A-Za-z0-9]/.test(password)) score++
   const clamped = Math.min(score, 4)
   const levels = [
     { label: '', color: '' },
@@ -57,34 +56,29 @@ function getPasswordStrength(password: string): { score: number; label: string; 
   return { score: clamped, ...levels[clamped] }
 }
 
-// ─── Validadores de campo ────────────────────────────────────────────────────
 const validators: Record<string, (v: string, ctx?: Record<string, string>) => string | null> = {
   firstName: (v) => v.trim().length < 2 ? 'Mínimo 2 caracteres' : null,
   lastName: (v) => v.trim().length < 2 ? 'Mínimo 2 caracteres' : null,
   documento: (v) => !/^\d{6,10}$/.test(v.trim()) ? 'Entre 6 y 10 dígitos numéricos' : null,
   email: (v) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'Correo inválido' : null,
   phoneNumber: (v) => v.replace(/\s/g, '').length < 7 ? 'Número muy corto' : null,
-  // ↓ CAMBIO: se agrega (?=.*[^A-Za-z0-9]) para exigir al menos un carácter especial
   password: (v) => !/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(v)
     ? 'Mínimo 8 caracteres, una mayúscula, un número y un carácter especial' : null,
   repeatPassword: (v, ctx) => v !== ctx?.password ? 'Las contraseñas no coinciden' : null,
 }
 
-// ─── Función para formatear el número de teléfono ───────────────────────────
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, '').slice(0, 10)
   return digits.replace(/(\d{3})(?=\d)/g, '$1 ').trim()
 }
 
-// ─── Clase de borde según estado ────────────────────────────────────────────
 function inputClass(touched: boolean, error: string | null): string {
-  const base = 'h-10 rounded-2xl bg-slate-50 soft-focus-ring pr-10'
+  const base = 'h-10 rounded-2xl bg-slate-50 text-slate-900 placeholder:text-slate-400 soft-focus-ring pr-10 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500'
   if (!touched) return base
   if (error) return `${base} border-red-400 focus-visible:ring-red-200`
   return `${base} border-green-400 focus-visible:ring-green-200`
 }
 
-// ─── Mensaje de campo ────────────────────────────────────────────────────────
 function FieldMsg({ show, error }: { show: boolean; error: string | null }) {
   if (!show) return null
   if (error) return (
@@ -99,7 +93,6 @@ function FieldMsg({ show, error }: { show: boolean; error: string | null }) {
   )
 }
 
-// ─── Botón de ojo ────────────────────────────────────────────────────────────
 function EyeToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
   return (
     <button
@@ -107,14 +100,13 @@ function EyeToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) 
       onClick={onToggle}
       tabIndex={-1}
       aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-700"
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"
     >
       {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
     </button>
   )
 }
 
-// ─── Página ──────────────────────────────────────────────────────────────────
 export default function Page() {
   const router = useRouter()
 
@@ -176,8 +168,23 @@ export default function Page() {
           acceptTerms: true,
         }),
       })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.message || 'Error al registrar el usuario')
+
+      // Leer el cuerpo como texto primero para manejar respuestas no-JSON (HTML de error)
+      const rawText = await response.text()
+
+      if (!response.ok) {
+        let message = 'Error al registrar el usuario'
+        try {
+          const errorData = JSON.parse(rawText)
+          message = errorData.message || message
+        } catch {
+          // El servidor devolvió texto plano o HTML; usar mensaje genérico
+          message = rawText.startsWith('<') ? message : rawText || message
+        }
+        throw new Error(message)
+      }
+
+      const data = JSON.parse(rawText)
       if (data.token) localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(
         data.user ?? { id: data.userId, email, firstName, lastName }
@@ -191,40 +198,40 @@ export default function Page() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.2),transparent_32%),linear-gradient(135deg,#f8fafc,#eef2ff_48%,#f8fafc)] px-5 py-4">
+    <div className="h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.2),transparent_32%),linear-gradient(135deg,#f8fafc,#eef2ff_48%,#f8fafc)] px-5 py-4 dark:bg-none dark:bg-slate-950">
       <div className="mx-auto grid h-full max-w-6xl items-center gap-8 lg:grid-cols-[0.82fr_1fr]">
 
         {/* ── Left panel ──────────────────────────────────────────────────── */}
         <section className="fade-up hidden lg:block">
-          <Link href="/" className="mb-5 inline-flex items-center gap-3 text-slate-950">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-blue-500/20">
+          <Link href="/" className="mb-5 inline-flex items-center gap-3 text-slate-950 dark:text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-blue-500/20 dark:bg-blue-600">
               <Car className="h-4 w-4" />
             </div>
             <div>
               <p className="font-black">Cali Motors</p>
-              <p className="text-xs text-slate-500">Registro de usuarios</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Registro de usuarios</p>
             </div>
           </Link>
-          <h1 className="max-w-xl text-4xl font-black leading-tight tracking-tight text-slate-950">
+          <h1 className="max-w-xl text-4xl font-black leading-tight tracking-tight text-slate-950 dark:text-white">
             Crea tu cuenta y empieza a moverte mejor.
           </h1>
-          <p className="mt-3 max-w-lg text-base leading-7 text-slate-600">
+          <p className="mt-3 max-w-lg text-base leading-7 text-slate-600 dark:text-slate-400">
             Publica vehiculos, explora el inventario y gestiona tus datos desde una experiencia clara y segura.
           </p>
           <div className="mt-5 grid max-w-lg gap-2">
             {['Marketplace organizado', 'Datos protegidos por autenticacion', 'Gestion de publicaciones'].map((item) => (
-              <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/80 p-3 shadow-lg shadow-slate-200/60">
+              <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/80 p-3 shadow-lg shadow-slate-200/60 dark:bg-slate-800/80 dark:shadow-slate-950/20">
                 <ShieldCheck className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-semibold text-slate-800">{item}</span>
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{item}</span>
               </div>
             ))}
           </div>
         </section>
 
         {/* ── Formulario ──────────────────────────────────────────────────── */}
-        <Card className="float-in rounded-[2rem] border-white/80 bg-white/95 shadow-2xl shadow-slate-300/60 backdrop-blur">
+        <Card className="float-in rounded-[2rem] border-white/80 bg-white/95 shadow-2xl shadow-slate-300/60 backdrop-blur dark:border-slate-700 dark:bg-slate-900 dark:shadow-slate-950/40">
           <CardContent className="p-5 sm:p-6">
-            <Button asChild variant="ghost" className="mb-3 rounded-xl px-0 text-slate-500 hover:bg-transparent hover:text-slate-950">
+            <Button asChild variant="ghost" className="mb-3 rounded-xl px-0 text-slate-500 hover:bg-transparent hover:text-slate-950 dark:text-slate-400 dark:hover:text-white">
               <Link href="/auth/login">
                 <ArrowLeft className="h-4 w-4" />
                 Ya tengo cuenta
@@ -232,8 +239,8 @@ export default function Page() {
             </Button>
 
             <div className="mb-4">
-              <h2 className="text-2xl font-black tracking-tight text-slate-950">Crear cuenta</h2>
-              <p className="mt-1 text-sm leading-5 text-slate-600">Completa tus datos para acceder al marketplace.</p>
+              <h2 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white">Crear cuenta</h2>
+              <p className="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-400">Completa tus datos para acceder al marketplace.</p>
             </div>
 
             <form onSubmit={handleSignUp} className="space-y-3" noValidate>
@@ -241,7 +248,7 @@ export default function Page() {
               {/* Nombre + Apellido */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <Label htmlFor="firstName">Nombre</Label>
+                  <Label htmlFor="firstName" className="text-slate-700 dark:text-slate-300">Nombre</Label>
                   <Input id="firstName" placeholder="Juan" required value={firstName} disabled={isLoading}
                     onChange={(e) => setFirstName(e.target.value)}
                     onBlur={() => touch('firstName')}
@@ -250,7 +257,7 @@ export default function Page() {
                   <FieldMsg show={!!touched.firstName} error={fieldErrors.firstName} />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="lastName">Apellido</Label>
+                  <Label htmlFor="lastName" className="text-slate-700 dark:text-slate-300">Apellido</Label>
                   <Input id="lastName" placeholder="Perez" required value={lastName} disabled={isLoading}
                     onChange={(e) => setLastName(e.target.value)}
                     onBlur={() => touch('lastName')}
@@ -263,7 +270,7 @@ export default function Page() {
               {/* Documento + Email */}
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <Label htmlFor="documento">Documento de identidad</Label>
+                  <Label htmlFor="documento" className="text-slate-700 dark:text-slate-300">Documento de identidad</Label>
                   <Input id="documento" placeholder="1234567890" required inputMode="numeric" maxLength={10}
                     value={documento} disabled={isLoading}
                     onChange={(e) => setDocumento(e.target.value.replace(/\D/g, '').slice(0, 10))}
@@ -273,7 +280,7 @@ export default function Page() {
                   <FieldMsg show={!!touched.documento} error={fieldErrors.documento} />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="email">Correo electrónico</Label>
+                  <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">Correo electrónico</Label>
                   <Input id="email" type="email" placeholder="correo@example.com" required
                     value={email} disabled={isLoading}
                     onChange={(e) => setEmail(e.target.value)}
@@ -286,15 +293,15 @@ export default function Page() {
 
               {/* Teléfono */}
               <div className="space-y-1">
-                <Label htmlFor="phoneNumber">Número de teléfono</Label>
+                <Label htmlFor="phoneNumber" className="text-slate-700 dark:text-slate-300">Número de teléfono</Label>
                 <div className="flex gap-2">
                   <select
                     value={phonePrefix} disabled={isLoading}
                     onChange={(e) => setPhonePrefix(e.target.value)}
-                    className="h-10 w-[110px] shrink-0 rounded-2xl border border-input bg-slate-50 px-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15"
+                    className="h-10 w-[110px] shrink-0 rounded-2xl border border-input bg-slate-50 px-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {COUNTRY_PREFIXES.map((c, i) => (
-                      <option key={`${c.flag}-${c.code}-${i}  `} value={c.code}>{c.flag} {c.code}</option>
+                      <option key={`${c.flag}-${c.code}-${i}`} value={c.code}>{c.flag} {c.code}</option>
                     ))}
                   </select>
                   <div className="flex flex-1 flex-col gap-1">
@@ -315,9 +322,8 @@ export default function Page() {
                 {/* Contraseña */}
                 <div className="space-y-1">
                   <div className="flex items-baseline justify-between gap-1">
-                    <Label htmlFor="password">Contraseña</Label>
-                    {/* ↓ CAMBIO: hint actualizado para mencionar el carácter especial */}
-                    <span className="text-[10px] leading-tight text-slate-400">8+ car., mayúscula, número y símbolo</span>
+                    <Label htmlFor="password" className="text-slate-700 dark:text-slate-300">Contraseña</Label>
+                    <span className="text-[10px] leading-tight text-slate-400 dark:text-slate-500">8+ car., mayúscula, número y símbolo</span>
                   </div>
                   <div className="relative">
                     <Input id="password" type={showPass ? 'text' : 'password'} required
@@ -349,7 +355,7 @@ export default function Page() {
 
                 {/* Repetir contraseña */}
                 <div className="space-y-1">
-                  <Label htmlFor="repeat-password">Repetir contraseña</Label>
+                  <Label htmlFor="repeat-password" className="text-slate-700 dark:text-slate-300">Repetir contraseña</Label>
                   <div className="relative">
                     <Input id="repeat-password" type={showRepeat ? 'text' : 'password'} required
                       value={repeatPassword} disabled={isLoading}
@@ -365,7 +371,7 @@ export default function Page() {
 
               {/* Error global */}
               {error && (
-                <p className="rounded-2xl border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700">
+                <p className="rounded-2xl border border-red-200 bg-red-50 p-2.5 text-xs font-medium text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
                   {error}
                 </p>
               )}

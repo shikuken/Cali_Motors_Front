@@ -70,24 +70,25 @@ export default function Page() {
             </div>
           </Link>
 
-          <Card className="rounded-[2rem] border-white/10 bg-white/95 shadow-2xl shadow-slate-950/40 backdrop-blur">
+          {/* dark:bg-slate-900 y dark:border-slate-700 aseguran contraste en modo oscuro */}
+          <Card className="rounded-[2rem] border-white/10 bg-white/95 shadow-2xl shadow-slate-950/40 backdrop-blur dark:border-slate-700 dark:bg-slate-900">
             <CardContent className="p-6 sm:p-8">
               <div className="mb-7">
-                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
                   <ShieldCheck className="h-4 w-4" />
                   Marketplace protegido
                 </div>
-                <h1 className="text-3xl font-black tracking-tight text-slate-950">Bienvenido de vuelta</h1>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <h1 className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">Bienvenido de vuelta</h1>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
                   Inicia sesión para explorar vehículos, publicar anuncios y gestionar tu perfil.
                 </p>
               </div>
 
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-700">Correo electrónico</Label>
+                  <Label htmlFor="email" className="text-slate-700 dark:text-slate-300">Correo electrónico</Label>
                   <div className="relative">
-                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                     <Input
                       id="email"
                       type="email"
@@ -95,16 +96,16 @@ export default function Page() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 rounded-2xl bg-slate-50 pl-10 soft-focus-ring"
+                      className="h-12 rounded-2xl bg-slate-50 pl-10 text-slate-900 placeholder:text-slate-400 soft-focus-ring dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       disabled={isLoading}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-slate-700">Contraseña</Label>
+                  <Label htmlFor="password" className="text-slate-700 dark:text-slate-300">Contraseña</Label>
                   <div className="relative">
-                    <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                     <Input
                       id="password"
                       type="password"
@@ -112,14 +113,14 @@ export default function Page() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 rounded-2xl bg-slate-50 pl-10 soft-focus-ring"
+                      className="h-12 rounded-2xl bg-slate-50 pl-10 text-slate-900 placeholder:text-slate-400 soft-focus-ring dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
                       disabled={isLoading}
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">
+                  <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
                     {error}
                   </div>
                 )}
@@ -142,9 +143,9 @@ export default function Page() {
                   )}
                 </Button>
 
-                <p className="text-center text-sm text-slate-500">
+                <p className="text-center text-sm text-slate-500 dark:text-slate-400">
                   ¿No tienes una cuenta?{' '}
-                  <Link href="/auth/sign-up" className="font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/auth/sign-up" className="font-bold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">
                     Regístrate ahora
                   </Link>
                 </p>
