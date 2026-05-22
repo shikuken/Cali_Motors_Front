@@ -22,14 +22,12 @@ import {
   Loader2,
   LogOut,
   MessageCircle,
-  Moon,
   Pencil,
   Plus,
   Scale,
   Search,
   ShieldCheck,
   Sparkles,
-  Sun,
   Trash2,
   User,
   X,
@@ -77,31 +75,6 @@ function getVehicleYear(vehicle: any) {
   return vehicle[nativeYearKey] ?? vehicle[mojibakeYearKey] ?? "N/D"
 }
 
-function ThemeToggleDropdownItem() {
-  const [isDark, setIsDark] = useState(false)
-
-  useEffect(() => {
-    const saved = localStorage.getItem("theme")
-    const active = saved === "dark"
-    document.documentElement.classList.toggle("dark", active)
-    setIsDark(active)
-  }, [])
-
-  const toggle = (e: React.MouseEvent) => {
-    e.preventDefault()
-    const next = !isDark
-    document.documentElement.classList.toggle("dark", next)
-    localStorage.setItem("theme", next ? "dark" : "light")
-    setIsDark(next)
-  }
-
-  return (
-    <DropdownMenuItem onClick={toggle} className="cursor-pointer dark:focus:bg-slate-800">
-      {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-      Modo {isDark ? "claro" : "oscuro"}
-    </DropdownMenuItem>
-  )
-}
 
 function VehicleGrid({
   vehicles,
@@ -506,7 +479,6 @@ export function DashboardContent({ user }: { user: any }) {
                     )}
                   </Link>
                 </DropdownMenuItem>
-                <ThemeToggleDropdownItem />
                 <DropdownMenuSeparator className="dark:bg-slate-800" />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-400">
                   <LogOut className="mr-2 h-4 w-4" />
